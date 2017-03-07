@@ -1,0 +1,186 @@
+<header>
+	<nav>
+	{% load static %}
+	<script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/search-bar.js' %}"></script>
+	<script type="text/javascript">
+		$(document).ready( function(){
+			$("#sug-frame").hide()
+
+            $("#keyword").focus(function(){
+                showSuggestion()
+            })
+
+			$("#keyword").keyup(function(event){
+				showSuggestion()
+			})
+
+			$('#keyword').bind('keypress',function(event){
+	            if(event.keyCode == "13")
+    	        {
+        	        search($(this).val())
+            	}
+        	})
+
+			$(document).click(function(e){
+			 e = window.event || e; // 兼容IE7
+			 obj = $(e.srcElement || e.target);
+			    if ($(obj).is("#sug-frame,#sug-frame *,#keyword")) {
+			   } else {
+			   	$("#sug-frame").hide()
+			 }
+			});
+
+			$("#sug-list li").click(function(){
+			   search($(this).innerHTML)
+			})
+		});
+
+function showSuggestionList(keywords) {
+    if(keywords.length == 0) return
+
+    var ul = $("#sug-list")
+    ul.empty()
+    for (var i = keywords.length - 1; i >= 0; i--) {
+        ul.append("<li onclick=\"search(this.innerHTML)\">" + keywords[i] + "</li>")
+    }
+    $("#sug-frame").show()
+}
+
+function showSuggestion() {
+    var sugFrame = document.getElementById("sug-frame")
+    var keyword = document.getElementById("keyword").value
+
+	keyword = keyword.toLowerCase()
+	keyword = keyword.replace(/\s+/,' ') //Remove extra spaces
+
+    if(keyword.length == 0) {
+        var historyKeywords = getCookie("history-keywords")
+        if(historyKeywords.length > 0){
+            keywords = historyKeywords.split("##")
+
+            showSuggestionList(keywords)
+        }
+    }else{
+		$.post("{% url 'keyword_suggest' %}", { 'keyword':keyword, 'csrfmiddlewaretoken': getCookie('csrftoken')}, function(data,status){
+			if(status == "success"){
+				var keywords = JSON.parse(data)
+				showSuggestionList(keywords)
+			}
+		})
+    }
+
+}
+
+function search(keyword) {
+
+    if(typeof keyword == "undefined" || keyword==null){
+        keyword = $("#keyword").val()
+    }
+
+    keyword = keyword.replace(/\s+/, ' ')
+
+    if(keyword.length == 0 || keyword == " ") return false
+
+    keyword = keyword.replace(/\s+/, '+')
+
+    //Add it to cookie if it does not exist
+    addHistoryKeyword(keyword)
+
+    $("#keyword").blur()
+    $("#sug-frame").hide()
+
+    window.location.href = "{% url 'search' %}" + "?&keyword=" + keyword
+}
+
+	</script>
+	<title></title>
+	<style>
+	.search{
+		top:20px;
+		height: 36px;
+		max-width: 600px;
+		margin-left: auto;
+		margin-right: auto;
+		padding-bottom: 0;
+	}
+
+	.search-frame , #sug-frame{
+		max-width: 600px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.search-frame{
+		height: 100%;
+	}
+
+	.search-frame #keyword, #sug-frame{
+		width:500px;
+	}
+
+	.search-frame #keyword{
+		margin-left: 0;
+		height:100%;
+		width: 500px;
+		font: 15px arial;
+		outline-color: none;
+		padding: 0;
+	}
+
+	.search-frame #search-button{
+		background-color: #3385ff;
+		color: #fff;
+		font: 15px arial;
+		letter-spacing: 1px;
+		height: 100%;
+		margin-right: 0;
+		border-bottom: 1px solid #2d78f4;
+		border:0;
+		cursor: pointer;
+	}
+
+	#sug-frame{
+		top:48px;
+		display: none;
+		margin-left: 0;
+		height: auto;
+		position: absolute;
+		z-index: 999;
+		background-color: #fff;
+	}
+	#sug-frame ul{
+		list-style-type: none;
+		padding: 0;
+		padding-left: 5px;
+		margin: 0;
+		border: 1px solid #ccc;
+		border-top: none;
+		display: block;
+	}
+	#sug-frame li{
+		padding: 0;
+		color: #004080;
+		font: 18px arial;
+		text-align: left;
+		height: 25px;
+		margin-bottom: 5px;
+		margin-left: 0;
+	}
+
+	#sug-frame li:hover{
+		background-color: #AAA;
+	}
+	</style>
+<div class="search">
+	<div class="search-frame">
+		<input id="keyword" type="text" placeholder="输入关键词" autocomplete="off" autocorrect="off">
+		<button id="search-button" type="submit" onclick="search()">开始搜索</button>
+	</div>
+	<div id="sug-frame">
+		<ul id="sug-list">
+		</ul>
+	</div>
+</div>
+	</nav>
+</header>

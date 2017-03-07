@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<style>
+@media only screen and (min-width:768px) and (max-width:1024px) {
+    .vid-container{
+        width: 30%;
+    }
+}
+
+@media only screen and (min-width:320px) and (max-width:767px) {
+    .vid-container{
+        width:100%;
+    }
+}
+
+.vid-container{
+    float: left;
+    margin: 5px;
+    padding: 15px;
+    width: auto;
+    max-width: 300px;
+    height: 200px;
+    border: 0px solid black;
+}
+
+#cover-container{
+    width:100%;
+    height:90%;
+    padding-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+}
+
+#cover-container img{
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+}
+
+#title-container{
+    position: relative;
+    height:20px;
+    left:0;
+    top:0;
+    padding-top:0;
+    padding-bottom: 0;
+    text-align: center;
+    background-color: black;
+    opacity: 0.5;
+    color: white;
+}
+
+</style>
+</head>
+
+{% include 'search-bar.html' %}
+<body>
+{% load static %}
+
+<script>
+    parts = window.location.href.split(/\?&keyword=/)
+    if(parts.length > 1){
+        keyword = decodeURI(parts[1])
+        document.write("\"<b>" + keyword + "</b>\"的搜索结果<br>")
+     }
+</script>
+
+{% for item in search_results %}
+<a href="/video/play/{{ item.0 }}">
+<div class="vid-container">
+    <div id="cover-container">
+        <img src="{% static item.1 %}">
+    </div>
+    <div id="title-container">
+        {{ item.2 }}
+    </div>
+</div>
+</a>
+{% empty %}
+<p>没有相关搜索记录</p>
+{% endfor %}
+
+{% if new_added_videos|length > 0 %}
+<h2>最近加入</h2>
+{% for item in new_added_videos %}
+<a href="/video/play/{{ item.0 }}">
+<div class="vid-container">
+    <div id="cover-container">
+        <img src="{% static item.1 %}">
+    </div>
+    <div id="title-container">
+        {{ item.2 }}
+    </div>
+</div>
+</a>
+{% empty %}
+<p>最近没有新加入的视频</p>
+{% endfor %}
+{% endif %}
+
+</body>
+</html>
