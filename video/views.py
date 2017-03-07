@@ -7,6 +7,7 @@ from models import KeywordCount
 from models import KeywordPathHash
 from models import KEYWORD_MAX_LENGTH
 import json
+import os
 
 import datetime
 
@@ -24,8 +25,9 @@ def index(request):
 	new_added_videos = []
 	if recent_records is not None:
 		for video in recent_records:
-			thumb = 'thumb/' + video.path_hash + '.png'
-			new_added_videos.append((video.path_hash,thumb,video.title))
+			if os.path.isfile(video.path):
+				thumb = 'thumb/' + video.path_hash + '.png'
+				new_added_videos.append((video.path_hash,thumb,video.title))
 
 	return render(request, 'video-index.html', {'new_added_videos':new_added_videos})
 
@@ -58,7 +60,9 @@ def search(request):
 			videos = Video.objects.filter(path_hash=path_hash)
 			if len(videos) > 0:
 				thumb = 'thumb/' + path_hash + '.png'
-				results.append((path_hash, thumb, videos[0].title))
+				# Only show existing results
+				if os.path.isfile(videos[0].path):
+					results.append((path_hash, thumb, videos[0].title))
 
 		return render(request, 'video-index.html', {'search_results':results})
 	except:

@@ -68,7 +68,7 @@
 </script>
 
 {% for item in search_results %}
-<a href="/video/play/{{ item.0 }}">
+<a href="{% url 'play' item.0 %}">
 <div class="vid-container">
     <div id="cover-container">
         <img src="{% static item.1 %}">
@@ -85,7 +85,7 @@
 {% if new_added_videos|length > 0 %}
 <h2>最近加入</h2>
 {% for item in new_added_videos %}
-<a href="/video/play/{{ item.0 }}">
+<a href="{% url 'play' item.0 %}">
 <div class="vid-container">
     <div id="cover-container">
         <img src="{% static item.1 %}">

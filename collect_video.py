@@ -49,9 +49,9 @@ def get_filename_tuple(filePath):
 				formats += r'|'
 			formats += f
 
-		file_name_reg = re.compile(r'(.*)/([^/]+)\.('+ formats + r')$')
+		file_name_reg = re.compile(r'(.*)/([^/]+)\.('+ formats + r')$', re.UNICODE | re.IGNORECASE)
 
-	match = file_name_reg.match(filePath, re.UNICODE | re.IGNORECASE)
+	match = file_name_reg.match(filePath)
 
 	if match is not None:
 		return match.groups()
@@ -133,7 +133,6 @@ def saveDictToDatabase(dict):
 
 def visitDir(baseDir):
 	baseDir = os.path.abspath(baseDir)
-
 
 	now = datetime.datetime.now()
 
