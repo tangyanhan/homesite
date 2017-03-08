@@ -8,38 +8,102 @@ from models import KeywordPathHash
 from models import KEYWORD_MAX_LENGTH
 import json
 import os
+import math
 
 import datetime
 
 RECENT_DAYS = 7
 
-# Create your views here.
+RECENT_CACHE = {
+	'date':'',
+	'records':[]
+}
+
+SEARCH_CACHE = {
+	# keyword : [result list] TODO: add date
+}
+
+RESULT_NUM_PER_PAGE = 10
+
 def index(request):
+	return render(request, 'video-index.html')
+
+# Create your views here.
+def loadRecentRecords():
 	today = datetime.date.today()
+
+	global RECENT_CACHE
+	if len(RECENT_CACHE) > 0:
+		delta = today - RECENT_CACHE['date']
+		# If recent is loaded less than 1 day ago, ignore it
+		if delta.days < 1:
+			return RECENT_CACHE['records']
 
 	global RECENT_DAYS
 	min_date = today - datetime.timedelta(days=RECENT_DAYS)
 	recent_records = Video.objects.filter(import_date__range=[min_date.strftime('%Y-%m-%d') , today.strftime('%Y-%m-%d')])
 
 
-	new_added_videos = []
-	if recent_records is not None:
-		for video in recent_records:
-			if os.path.isfile(video.path):
-				thumb = 'thumb/' + video.path_hash + '.png'
-				new_added_videos.append((video.path_hash,thumb,video.title))
+	RECENT_CACHE['records'] = []
 
-	return render(request, 'video-index.html', {'new_added_videos':new_added_videos})
+	list = RECENT_CACHE['records']
+	for video in recent_records:
+		dict = dictForVideo(video)
+		if dict is None:
+			continue
+
+		list.append(dict)
+	return list
+
+def dictForVideo(video):
+	if os.path.isfile(video.path):
+		return {'id':video.path_hash, 'title':video.title}
+
+	return None
 
 def play(request,digest):
-
 	return render(request,'video-player.html', {'video':digest, 'thumb':'thumb/'+ digest +'.png'})
 
-def search(request):
+
+def videos(request):
 	try:
+		keyword = None
+		if 'keyword' in request.GET:
+			keyword = request.GET['keyword']
+		idx = 0
+		if 'idx' in request.GET:
+			idx = int(request.GET['idx'])
 
-		keyword = request.GET['keyword']
+		results = []
+		if keyword is None or len(keyword) == 0:
+			results = loadRecentRecords()
+		else:
+			results = loadSearchResultsWithKeyword(keyword)
 
+		global RESULT_NUM_PER_PAGE
+		pageNum = math.ceil(len(results) / RESULT_NUM_PER_PAGE) # TODO: check if python has a same old ceil problem
+
+		if idx >= pageNum:
+			return render(request,'404.html')
+
+		beginIdx = idx * RESULT_NUM_PER_PAGE
+		endIdx = beginIdx + RESULT_NUM_PER_PAGE
+		if endIdx > len(results):
+			endIdx = len(results)
+		pageRecords = results[beginIdx:endIdx]
+
+		jsonData = json.dumps({'pageNum':pageNum, 'results':pageRecords})
+		return jsonData
+	except:
+		return render(request, '500.html')
+
+def loadSearchResultsWithKeyword(keyword):
+	try:
+		# Retrieve from cache first
+		if keyword in SEARCH_CACHE:
+			return SEARCH_CACHE[keyword]
+
+		# No results in cache, load from database
 		keys = keyword.split(' ')
 
 		resultSet = set()
@@ -59,14 +123,11 @@ def search(request):
 		for path_hash in resultSet:
 			videos = Video.objects.filter(path_hash=path_hash)
 			if len(videos) > 0:
-				thumb = 'thumb/' + path_hash + '.png'
-				# Only show existing results
-				if os.path.isfile(videos[0].path):
-					results.append((path_hash, thumb, videos[0].title))
-
-		return render(request, 'video-index.html', {'search_results':results})
+				dict = dictForVideo(videos[0])
+				results.append(dict)
+		return results
 	except:
-		return render(request,'500.html')
+		return []
 
 def keyword_suggest(request):
 	keyword = request.POST['keyword']

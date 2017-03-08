@@ -26,7 +26,7 @@ urlpatterns = [
 		url(r'^$', video_views.index, name='video-index'),
 		url(r'^play/([a-f0-9]+)$', video_views.play,name='play'),
 		url(r'^stream/([a-f0-9]+)$', video_stream.stream, name='stream'),
-		url(r'^search.*$', video_views.search, name='search'),
+		url(r'^videos-ajax.*$', video_views.videos, name='videos-ajax'),
 		url(r'^suggest/', video_views.keyword_suggest, name='keyword_suggest'),
 		url(r'^admin/', admin.site.urls),
 			] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

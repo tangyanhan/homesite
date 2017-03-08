@@ -156,15 +156,19 @@ def visitDir(baseDir):
 				if fileName.startswith('.'):
 					continue
 
+				needConvert = False
 				if ext.lower() != 'mp4':
-					mp4Path = os.path.join(fileDir, fileName)
-					mp4Path += '.mp4'
-					if not convert_video_to_mp4(file, mp4Path):
-						print '#Failed to convert file to mp4:', file
-						continue
-					else:
-						file = mp4Path
-						ext = 'mp4'
+					needConvert = True
+					# Disable video convert for the time being, we should convert them in idle time
+					if False:
+						mp4Path = os.path.join(fileDir, fileName)
+						mp4Path += '.mp4'
+						if not convert_video_to_mp4(file, mp4Path):
+							print '#Failed to convert file to mp4:', file
+							continue
+						else:
+							file = mp4Path
+							ext = 'mp4'
 
 				path_hash = FilePathHashMap.encode_path(file)
 
@@ -176,6 +180,7 @@ def visitDir(baseDir):
 				else:
 					video = Video()
 					video.path_hash = path_hash
+					video.need_convert = needConvert
 
 				thumbPath = get_thumb_path(path_hash)
 

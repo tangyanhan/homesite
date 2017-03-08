@@ -90,7 +90,44 @@ function search(keyword) {
     $("#keyword").blur()
     $("#sug-frame").hide()
 
-    window.location.href = "{% url 'search' %}" + "?&keyword=" + keyword
+	loadSearchPage(keyword,0)
+}
+
+function loadSearchPage(keyword, pageIndex) {
+	document.title = keyword + "-" + pageIndex
+
+	url =  + "?&keyword=" + keyword + "&pg=" + pageIndex
+	$.getJSON(url, function("{% url 'videos-ajax' %}", {"keyword":keyword, "idx":pageIndex}, function(jsonData){
+		var pageNum = jsonData[ "pageNum" ]
+		var results = jsonData[ "results" ]
+
+		var videoDiv = $("#videos")
+		videoDiv.empty() //remove old results
+		for(var i=0; i<results.length; i++) {
+			video = results[i]
+			a = document.createElement("a")
+			//a.href="{% url 'play'  %}" + video.id
+			a.href="/play/" + video.id
+			img = document.createElement("img")
+			img.src ="{% static 'thumb/' %}" + video.id
+			title = document.createElement("div")
+			title.id = video.title
+
+			coverContainer = document.createElement("div")
+			coverContainer.id = "cover-container"
+			coverContainer.append(img)
+			coverContainer.append(title)
+
+			vidContainer = document.createElement("div")
+			vidContainer.id = "vid-container"
+			vidContainer.append(coverContainer)
+
+			a.append(vidContainer)
+
+			videoDiv.append(a)
+		}
+	}
+	)
 }
 
 	</script>
