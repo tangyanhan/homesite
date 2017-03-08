@@ -150,16 +150,28 @@ def visitDir(baseDir):
 				if tuple is None:
 					continue
 
+				(fileDir, fileName, ext) = tuple
+
 				# skip hidden files (possibly not valid video files)
-				if str(tuple[1]).startswith('.'):
+				if fileName.startswith('.'):
 					continue
+
+				if ext.lower() != 'mp4':
+					mp4Path = os.path.join(fileDir, fileName)
+					mp4Path += '.mp4'
+					if not convert_video_to_mp4(file, mp4Path):
+						print '#Failed to convert file to mp4:', file
+						continue
+					else:
+						file = mp4Path
+						ext = 'mp4'
 
 				path_hash = FilePathHashMap.encode_path(file)
 
 				existObjects = Video.objects.filter(path_hash=path_hash)
 
 				video = None
-				if(len(existObjects) == 1):
+				if len(existObjects) == 1:
 					video = existObjects[0]
 				else:
 					video = Video()
@@ -200,7 +212,7 @@ def visitDir(baseDir):
 						data.count = data.count + 1
 						data.files.add(path_hash)
 
-				video.title = tuple[1]
+				video.title = fileName
 				video.path = file
 				video.duration = duration
 
@@ -228,9 +240,25 @@ def gen_thumb(videoPath, thumbPath):
 	cmd = ['ffmpeg', '-itsoffset', '-1', '-i', videoPath, '-vframes', '1', '-f', 'apng', '-s', '320x240', thumbPath]
 	p = Popen(cmd, stdout=PIPE, stderr=PIPE)
 
-	output = p.communicate(input="y\n")[1]
+	output = p.communicate(input="y\n")[1] # TODO: need a solution to answer questions
 
-	return  output
+	return output
+
+# Convert video to mp4
+def convert_video_to_mp4(videoPath,destPath):
+	if os.path.isfile(destPath):
+		print '#Already converted,skip:',destPath
+		return True
+
+	cmd = ['ffmpeg', '-i', '-vcodec', 'h264', '-acodec', 'aac', destPath]
+	p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+
+	# Remove old if succeeded
+	if os.path.isfile(destPath) and os.path.getsize(destPath) > 0:
+		os.remove(videoPath)
+		return True
+
+	return False
 
 # Search the duration from given text
 def search_duration_from_text(text):
