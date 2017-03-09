@@ -4,8 +4,7 @@
     {% load static %}
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
-    <script>
-    </script>
+    {% include 'search-bar.html' %}
 <style>
 @media only screen and (min-width:768px) and (max-width:1024px) {
     .vid-container{
@@ -54,6 +53,7 @@
     background-color: black;
     opacity: 0.5;
     color: white;
+    z-index:99;
 }
 
 #pageidx {
@@ -63,27 +63,24 @@
 }
 
 #pageidx li{
-
+    min-width:10px;
+    max-width:30px;
+    height:20px;
 }
 
 </style>
+
 </head>
 
-{% include 'search-bar.html' %}
 <body>
 
-<script>
-   if(keyword.length>0){
-    document.write("\"<b>" + keyword + "</b>\"的搜索结果<br>")
-    }
-</script>
-
 <div id="videos">
-    <script>
-        loadSearchPage("",0)
-    </script>
 </div>
-<ul id="pageidx"></ul>
+<br>
+<br>
+<br>
+<br>
+<ul id="pageIdx"></ul>
 
 </body>
 </html>

@@ -1,11 +1,18 @@
+<!-- begin search-bar -->
 <header>
 	<nav>
 	{% load static %}
 	<script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/search-bar.js' %}"></script>
+		<!-- begin pageIdx -->
+		<link rel="stylesheet" type="text/css" href="{% static 'css/pageidx.css' %}"/>
+    <script type="text/javascript" src="{% static 'js/pageidx.js' %}"></script>
+    <!-- end pageIdx -->
 	<script type="text/javascript">
 		$(document).ready( function(){
 			$("#sug-frame").hide()
+
+			loadPage()
 
             $("#keyword").focus(function(){
                 showSuggestion()
@@ -78,11 +85,9 @@ function search(keyword) {
         keyword = $("#keyword").val()
     }
 
-    keyword = keyword.replace(/\s+/, ' ')
+	keyword = processKeyword(keyword)
 
     if(keyword.length == 0 || keyword == " ") return false
-
-    keyword = keyword.replace(/\s+/, '+')
 
     //Add it to cookie if it does not exist
     addHistoryKeyword(keyword)
@@ -90,44 +95,68 @@ function search(keyword) {
     $("#keyword").blur()
     $("#sug-frame").hide()
 
-	loadSearchPage(keyword,0)
+	window.location.href = getLocation(keyword, 0)
 }
 
-function loadSearchPage(keyword, pageIndex) {
-	document.title = keyword + "-" + pageIndex
+function dealWithKeyword(keyword){
+	keyword = keyword.toLowerCase()
+    keyword = keyword.replace(/\s+/, ' ')
+    keyword = keyword.replace(/&/,'')
 
-	url =  + "?&keyword=" + keyword + "&pg=" + pageIndex
-	$.getJSON(url, function("{% url 'videos-ajax' %}", {"keyword":keyword, "idx":pageIndex}, function(jsonData){
-		var pageNum = jsonData[ "pageNum" ]
-		var results = jsonData[ "results" ]
+    return keyword
+}
 
-		var videoDiv = $("#videos")
-		videoDiv.empty() //remove old results
-		for(var i=0; i<results.length; i++) {
-			video = results[i]
-			a = document.createElement("a")
-			//a.href="{% url 'play'  %}" + video.id
-			a.href="/play/" + video.id
-			img = document.createElement("img")
-			img.src ="{% static 'thumb/' %}" + video.id
-			title = document.createElement("div")
-			title.id = video.title
+function getLocation(keyword, pageIndex) {
+	return "{% url 'search' %}" + "?&keyword=" + keyword + "&idx=" + pageIndex
+}
 
-			coverContainer = document.createElement("div")
-			coverContainer.id = "cover-container"
-			coverContainer.append(img)
-			coverContainer.append(title)
+function loadPage() {
+	var keyword = "{{ keyword }}"
+	var pageIndex = {{ idx }}
+	var pageNum = {{ pageNum }}
+	var results = {{ results|safe }}
 
-			vidContainer = document.createElement("div")
-			vidContainer.id = "vid-container"
-			vidContainer.append(coverContainer)
-
-			a.append(vidContainer)
-
-			videoDiv.append(a)
+	// Deal with title
+	title = "视频首页"
+	if( keyword.length > 0 ) {
+		title = keyword
+		if( pageIndex > 0 ) {
+			title = title + "#" + pageIndex
 		}
 	}
-	)
+
+	document.title = title
+
+	var videoDiv = $("#videos")
+	videoDiv.empty() //remove old results
+
+	for(var i=0; i<results.length; i++) {
+		video = results[i]
+
+		a = document.createElement("a")
+		a.href= "/play/" + video.id
+		img = document.createElement("img")
+		img.src ="{% static 'thumb/' %}" + video.id + ".png"
+		title = document.createElement("div")
+		title.id = "title-container"
+		title.innerHTML = video.title
+
+		coverContainer = document.createElement("div")
+		coverContainer.id = "cover-container"
+		coverContainer.append(img)
+		coverContainer.append(title)
+
+		vidContainer = document.createElement("div")
+		vidContainer.setAttribute("class","vid-container")
+		vidContainer.append(coverContainer)
+
+		a.append(vidContainer)
+
+		videoDiv.append(a)
+	}
+
+	//recreate page index if necessary
+	updatePageIndex(pageIndex, pageNum)
 }
 
 	</script>
@@ -221,3 +250,4 @@ function loadSearchPage(keyword, pageIndex) {
 </div>
 	</nav>
 </header>
+<!-- end search-bar -->

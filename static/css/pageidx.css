@@ -1,0 +1,40 @@
+        #pageIdx{
+            list-style-type: none;
+            float: left;
+        }
+
+        #pageIdx li{
+            float:left;
+            display:inline-block;
+            vertical-align:text-bottom;
+            height:40px;
+            text-align:center;
+            line-height:34px;
+            text-decoration:none;
+            margin-right:9px;
+            background:#fff;
+            cursor: pointer;
+            border: 1px solid #e1e2e3;
+        }
+
+        #pageIdx a{
+            text-decoration:none;
+            color: blue;
+        }
+
+        #pageIdx .pc {
+            width: 34px;
+            height: 34px;
+            cursor: pointer;
+        }
+
+        #pageIdx .btn{
+            height: 34px;
+            border: 1px solid #e1e2e3;
+            cursor: pointer;
+        }
+
+        #pageIdx span {
+            display:block;
+            cursor: pointer;
+        }
