@@ -69,7 +69,8 @@ function showSuggestion() {
             showSuggestionList(keywords)
         }
     }else{
-		$.post("{% url 'keyword_suggest' %}", { 'keyword':keyword, 'csrfmiddlewaretoken': getCookie('csrftoken')}, function(data,status){
+		$.post("{% url 'keyword_suggest' %}", { 'keyword':keyword, 'csrfmiddlewaretoken': getCookie('csrftoken')},
+			function(data,status){
 			if(status == "success"){
 				var keywords = JSON.parse(data)
 				showSuggestionList(keywords)
@@ -98,7 +99,7 @@ function search(keyword) {
 	window.location.href = getLocation(keyword, 0)
 }
 
-function dealWithKeyword(keyword){
+function processKeyword(keyword){
 	keyword = keyword.toLowerCase()
     keyword = keyword.replace(/\s+/, ' ')
     keyword = keyword.replace(/&/,'')
@@ -241,7 +242,7 @@ function loadPage() {
 <div class="search">
 	<div class="search-frame">
 		<input id="keyword" type="text" placeholder="输入关键词" autocomplete="off" autocorrect="off">
-		<button id="search-button" type="submit" onclick="search()">开始搜索</button>
+		<button id="search-button" onclick="search()">开始搜索</button>
 	</div>
 	<div id="sug-frame">
 		<ul id="sug-list">

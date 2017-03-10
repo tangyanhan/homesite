@@ -101,6 +101,8 @@ def videos(request):
 		global RESULT_NUM_PER_PAGE
 		pageNum = math.ceil(len(results) / RESULT_NUM_PER_PAGE) # TODO: check if python has a same old ceil problem
 
+		pdb.set_trace()
+
 		if idx >= pageNum:
 			return render(request,'404.html')
 
@@ -151,7 +153,7 @@ def loadSearchResultsWithKeyword(keys):
 			if key in SEARCH_CACHE[ key ]:
 				periodSet = SEARCH_CACHE[ key ]
 			else:
-				mergedRecords = chain(KeywordPathHash.objects.filter(keyword__contains=keys), Video.objects.filter(title__contains=keys))
+				mergedRecords = chain(KeywordPathHash.objects.filter(keyword__icontains=keys), Video.objects.filter(title__icontains=keys))
 				for record in mergedRecords:
 					periodSet.add(record.path_hash)
 
@@ -173,21 +175,26 @@ def loadSearchResultsWithKeyword(keys):
 		return []
 
 def keyword_suggest(request):
-	keyword = request.POST['keyword']
+	try:
+		keyword = request.POST['keyword']
 
-	if len(keyword) > KEYWORD_MAX_LENGTH:
+		if len(keyword) > KEYWORD_MAX_LENGTH:
+			return HttpResponse('')
+
+		availableKeywords = KeywordCount.objects.filter(keyword__icontains=keyword)
+
+		if len(availableKeywords) > 0:
+			sugList = []
+			for record in availableKeywords:
+				sugList.append(record.keyword)
+
+			return json.dumps(sugList)
+
+	except Exception as e:
+		exc_type, exc_value, exc_traceback = sys.exc_info()
+		print "*** print_exception:"
+		traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
 		return HttpResponse('')
-
-	availableKeywords = KeywordCount.objects.filter(keyword__contains=keyword)
-
-	if len(availableKeywords) > 0:
-		sugList = []
-		for record in availableKeywords:
-			sugList.append(record.keyword)
-
-		return JsonResponse(sugList)
-
-	return JsonResponse([])
 
 def video_import(request):
 	path = request.POST['path']
