@@ -21,6 +21,7 @@ import settings
 
 from video import video_stream
 from video import views as video_views
+from live import views as live_views
 
 urlpatterns = [
 		url(r'^$', video_views.videos, name='video-index'),
@@ -28,5 +29,7 @@ urlpatterns = [
 		url(r'^stream/([a-f0-9]+)$', video_stream.stream, name='stream'),
 		url(r'^search.*$', video_views.videos, name='search'),
 		url(r'^suggest/', video_views.keyword_suggest, name='keyword_suggest'),
+		url(r'^live-post/(\d+)$', live_views.post, name='live-post'),
+		url(r'^live/(\d+)$', live_views.live, name='live'),
 		url(r'^admin/', admin.site.urls),
 			] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
