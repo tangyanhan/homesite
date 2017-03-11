@@ -1,46 +1,55 @@
-        function updatePageIndex(current,total) {
-            pageIdx = document.getElementById("pageIdx")
+function updatePageIndex(current,total,keyword,genUrl) {
+    pageIdx = document.getElementById("pageIdx")
 
-            pageIdx.innerHTML=""
+    pageIdx.innerHTML=""
 
-            if(total > 1) {
-                if( current != 0 ) {
-                    li = document.createElement("li")
-                    li.innerHTML = "<a href=\"#\">" + "< 上一页" + "</a>"
+    if(total > 1) {
+        if( current != 0 ) {
+            li = document.createElement("li")
+            a = document.createElement("a")
+            a.href=genUrl(keyword,current-1)
+            a.innerHTML = "< 上一页"
 
-                    pageIdx.append(li)
-                }
+            li.append(a)
 
-                for(var i=0; i<total; i++) {
-                    li = document.createElement("li")
-                    li.id = "page-num"
+            pageIdx.append(li)
+        }
 
-                    pgNum = i+1
+        for(var i=0; i<total; i++) {
+            li = document.createElement("li")
+            li.id = "page-num"
 
-                    span = document.createElement("span")
-                    span.setAttribute("class","pc")
-                    span.innerHTML = pgNum
+            pgNum = i+1
 
-                    if(i == current) {
-                        strong = document.createElement("strong")
-                        strong.append(span)
-                        li.append(strong)
-                        li.style.border = "0"
-                    }else{
-                        a = document.createElement("a")
-                        a.href = "<a href=\"#\">" + pgNum + "</a>"
-                        a.append(span)
-                        li.append(a)
-                    }
+            span = document.createElement("span")
+            span.setAttribute("class","pc")
+            span.innerHTML = pgNum
 
-                    pageIdx.append(li)
-                }
-
-                if( current != (total-1) ) {
-                    li = document.createElement("li")
-                    li.innerHTML = "<a href=\"#\">" + "下一页>" + "</a>"
-                    pageIdx.append(li)
-                }
+            if(i == current) {
+                strong = document.createElement("strong")
+                strong.append(span)
+                li.append(strong)
+                li.style.border = "0"
+            }else{
+                a = document.createElement("a")
+                a.href = genUrl(keyword,i)
+                a.append(span)
+                li.append(a)
             }
 
+            pageIdx.append(li)
         }
+
+        if( current != (total-1) ) {
+            li = document.createElement("li")
+            a = document.createElement("a")
+            a.href=genUrl(keyword,current-1)
+            a.innerHTML = "< 下一页"
+
+            li.append(a)
+
+            pageIdx.append(li)
+        }
+    }
+
+}

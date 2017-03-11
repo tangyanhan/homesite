@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from django.views.decorators.csrf import csrf_exempt
 from models import Video
 from models import KeywordCount
 from models import KeywordPathHash
@@ -75,9 +76,6 @@ def play(request,digest):
 
 def videos(request):
 	try:
-		print '###Request'
-		print request
-		print '#######'
 		keyword = None
 		if 'keyword' in request.GET:
 			keyword = request.GET['keyword']
@@ -100,8 +98,6 @@ def videos(request):
 
 		global RESULT_NUM_PER_PAGE
 		pageNum = math.ceil(len(results) / RESULT_NUM_PER_PAGE) # TODO: check if python has a same old ceil problem
-
-		pdb.set_trace()
 
 		if idx >= pageNum:
 			return render(request,'404.html')
@@ -174,6 +170,8 @@ def loadSearchResultsWithKeyword(keys):
 	except:
 		return []
 
+# Suggest keyword to client. This view don't need csrf
+@csrf_exempt
 def keyword_suggest(request):
 	try:
 		keyword = request.POST['keyword']

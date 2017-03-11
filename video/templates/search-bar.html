@@ -111,6 +111,24 @@ function getLocation(keyword, pageIndex) {
 	return "{% url 'search' %}" + "?&keyword=" + keyword + "&idx=" + pageIndex
 }
 
+function durationStringFromSeconds(seconds) {
+	var duration = ""
+
+	var sec = seconds % 60
+	var min = parseInt(seconds / 60)
+	var hour = 0
+	if (min >= 60) {
+		hour = parseInt(min / 60)
+		min %= 60
+
+		duration += hour
+	 }
+
+	duration = duration + ((hour>0)? ":" : "") +((min<10)? "0" : "") + min + ":" + ((sec<10)? "0" :"") + sec
+
+	return duration
+}
+
 function loadPage() {
 	var keyword = "{{ keyword }}"
 	var pageIndex = {{ idx }}
@@ -142,22 +160,23 @@ function loadPage() {
 		title.id = "title-container"
 		title.innerHTML = video.title
 
+		duration = document.createElement("div")
+		duration.id = "duration-container"
+		duration.innerHTML = durationStringFromSeconds(video.duration)
+
 		coverContainer = document.createElement("div")
 		coverContainer.id = "cover-container"
 		coverContainer.append(img)
 		coverContainer.append(title)
+		coverContainer.append(duration)
 
-		vidContainer = document.createElement("div")
-		vidContainer.setAttribute("class","vid-container")
-		vidContainer.append(coverContainer)
-
-		a.append(vidContainer)
+		a.append(coverContainer)
 
 		videoDiv.append(a)
 	}
 
 	//recreate page index if necessary
-	updatePageIndex(pageIndex, pageNum)
+	updatePageIndex(pageIndex, pageNum, keyword, getLocation)
 }
 
 	</script>
