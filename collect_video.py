@@ -24,6 +24,8 @@ supported_video_formats = ['mp4','mov','wmv','rmvb','rm','avi']
 
 THUMB_DIR = './static/thumb/'
 
+THUMB_SIZE = '180x135'
+
 gChangeDB = True
 
 file_name_reg = None
@@ -60,6 +62,10 @@ def get_filename_tuple(filePath):
 
 
 def get_thumb_path(fileName):
+	global THUMB_DIR
+	if not os.path.isdir(THUMB_DIR):
+		os.mkdir(THUMB_DIR)
+
 	return './static/thumb/' + fileName + '.png'
 
 # TODO: we should use an advanced method to analyze them
@@ -242,7 +248,8 @@ def gen_thumb(videoPath, thumbPath):
 	if os.path.isfile(thumbPath):
 		os.remove(thumbPath)
 
-	cmd = ['ffmpeg', '-itsoffset', '-1', '-i', videoPath, '-vframes', '1', '-f', 'apng', '-s', '320x240', thumbPath]
+	global THUMB_SIZE
+	cmd = ['ffmpeg', '-itsoffset', '-1', '-i', videoPath, '-vframes', '1', '-f', 'apng', '-s', THUMB_SIZE, thumbPath]
 	p = Popen(cmd, stdout=PIPE, stderr=PIPE)
 
 	output = p.communicate(input="y\n")[1] # TODO: need a solution to answer questions
