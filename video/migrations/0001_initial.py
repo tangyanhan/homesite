@@ -22,17 +22,17 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='KeywordPathHash',
+            name='KeywordVideoId',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('keyword', models.CharField(max_length=100)),
-                ('path_hash', models.CharField(max_length=32)),
+                ('video_id', models.CharField(max_length=32)),
             ],
         ),
         migrations.CreateModel(
             name='Video',
             fields=[
-                ('path_hash', models.CharField(max_length=32, primary_key=True, serialize=False)),
+                ('video_id', models.CharField(max_length=32, primary_key=True, serialize=False)),
                 ('title', models.CharField(default='', max_length=256)),
                 ('path', models.CharField(max_length=1024)),
                 ('duration', models.PositiveSmallIntegerField(null=True)),

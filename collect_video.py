@@ -4,20 +4,22 @@
 import sqlite3
 import sys
 import os
-from video.file_path_hash_map import FilePathHashMap
 from subprocess import Popen, PIPE, STDOUT
 import re
 import datetime
 import traceback
+import pdb
 
 import  homesite.settings
 os.environ.update({"DJANGO_SETTINGS_MODULE": "homesite.settings"})
 import django
 django.setup()
 
+from django.db.models import Max
+
 from video.models import Video
 from video.models import KeywordCount
-from video.models import KeywordPathHash
+from video.models import KeywordVideoId
 
 #TODO: we should make it in a public library like 'supported format'
 supported_video_formats = ['mp4','mov','wmv','rmvb','rm','avi']
@@ -29,6 +31,8 @@ THUMB_SIZE = '180x135'
 gChangeDB = True
 
 file_name_reg = None
+
+VIDEO_ID = 0
 
 
 class KeywordDictDataObj(object):
@@ -66,7 +70,7 @@ def get_thumb_path(fileName):
 	if not os.path.isdir(THUMB_DIR):
 		os.mkdir(THUMB_DIR)
 
-	return './static/thumb/' + fileName + '.png'
+	return './static/thumb/' + str(fileName) + '.png'
 
 # TODO: we should use an advanced method to analyze them
 # @return: a list of keywords concaternated together
@@ -93,12 +97,12 @@ def buildKeywordDict():
 
 	del keywords
 
-	key_hash_list = KeywordPathHash.objects.all()
+	key_hash_list = KeywordVideoId.objects.all()
 
 	for kh in key_hash_list:
 		if kh.keyword in dict:
 			data = dict[ kh.keyword ]
-			data.files.add(kh.path_hash)
+			data.files.add(kh.video_id)
 		else:
 			print '#Keyword not found:', kh
 
@@ -110,8 +114,8 @@ def saveDictToDatabase(dict):
 		data = dict[key]
 		print '#', key, '#'
 		print 'Count:',data.count
-		for hash in data.files:
-			print "\t",hash
+		for vid_id in data.files:
+			print "\t",vid_id
 		if data.count > 0:
 			kcs = KeywordCount.objects.filter(keyword=key)
 			kc = None
@@ -125,17 +129,21 @@ def saveDictToDatabase(dict):
 			if gChangeDB:
 				kc.save()
 
-			for hash in data.files:
-				files = KeywordPathHash.objects.filter(keyword=key,path_hash=hash)
+			for vid_id in data.files:
+				files = KeywordVideoId.objects.filter(keyword=key,video_id=vid_id)
 
 				if len(files) == 0:
-					kph = KeywordPathHash()
+					kph = KeywordVideoId()
 					kph.keyword = key
-					kph.path_hash = hash
+					kph.video_id = vid_id
 
 					if gChangeDB:
 						kph.save()
 
+def nextVideoId():
+	global VIDEO_ID
+	VIDEO_ID += 1
+	return VIDEO_ID
 
 def visitDir(baseDir):
 	baseDir = os.path.abspath(baseDir)
@@ -143,6 +151,13 @@ def visitDir(baseDir):
 	now = datetime.datetime.now()
 
 	dict = buildKeywordDict()
+
+	maxVideoId = Video.objects.all().aggregate(Max('video_id'))['video_id__max']
+
+	if maxVideoId is not None:
+		global VIDEO_ID
+		VIDEO_ID = maxVideoId
+
 	for (root, dirs, files) in os.walk(sys.argv[1]):
 		for fname in files:
 			try:
@@ -176,19 +191,19 @@ def visitDir(baseDir):
 							file = mp4Path
 							ext = 'mp4'
 
-				path_hash = FilePathHashMap.encode_path(file)
+				video_id = nextVideoId()
 
-				existObjects = Video.objects.filter(path_hash=path_hash)
+				existObjects = Video.objects.filter(video_id=video_id)
 
 				video = None
 				if len(existObjects) == 1:
 					video = existObjects[0]
 				else:
 					video = Video()
-					video.path_hash = path_hash
+					video.video_id = video_id
 					video.need_convert = needConvert
 
-				thumbPath = get_thumb_path(path_hash)
+				thumbPath = get_thumb_path(video_id)
 
 				output = gen_thumb(file,thumbPath)
 
@@ -219,9 +234,9 @@ def visitDir(baseDir):
 						data = KeywordDictDataObj()
 						dict[key] = data
 
-					if path_hash not in data.files:
+					if video_id not in data.files:
 						data.count = data.count + 1
-						data.files.add(path_hash)
+						data.files.add(video_id)
 
 				video.title = fileName
 				video.path = file

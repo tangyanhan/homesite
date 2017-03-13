@@ -6,7 +6,7 @@ from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from models import Video
 from models import KeywordCount
-from models import KeywordPathHash
+from models import KeywordVideoId
 from models import KEYWORD_MAX_LENGTH
 import json
 import os
@@ -66,7 +66,7 @@ def loadRecentRecords():
 
 def dictForVideo(video):
 	if os.path.isfile(video.path):
-		return {'id':video.path_hash, 'title':video.title, 'duration':video.duration}
+		return {'id':video.video_id, 'title':video.title, 'duration':video.duration}
 
 	return None
 
@@ -149,9 +149,9 @@ def loadSearchResultsWithKeyword(keys):
 			if key in SEARCH_CACHE[ key ]:
 				periodSet = SEARCH_CACHE[ key ]
 			else:
-				mergedRecords = chain(KeywordPathHash.objects.filter(keyword__icontains=keys), Video.objects.filter(title__icontains=keys))
+				mergedRecords = chain(KeywordVideoId.objects.filter(keyword__icontains=keys), Video.objects.filter(title__icontains=keys))
 				for record in mergedRecords:
-					periodSet.add(record.path_hash)
+					periodSet.add(record.video_id)
 
 				if len(periodSet) > 0:
 					SEARCH_CACHE[ key ] = periodSet # TODO: cache stragety is too simple and may result to memory issue in future
@@ -161,8 +161,8 @@ def loadSearchResultsWithKeyword(keys):
 				resultSet = resultSet.intersection(periodSet)
 
 		results = []
-		for path_hash in resultSet:
-			videos = Video.objects.filter(path_hash=path_hash)
+		for video_id in resultSet:
+			videos = Video.objects.filter(video_id=video_id)
 			if len(videos) > 0:
 				dict = dictForVideo(videos[0])
 				results.append(dict)

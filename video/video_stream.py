@@ -45,7 +45,7 @@ class RangeFileWrapper(object):
 
 def stream(request, digest):
 
-	videos = Video.objects.filter(path_hash=digest)
+	videos = Video.objects.filter(video_id=digest)
 
 	if len(videos) == 0:
 		return render(request, '404.html')

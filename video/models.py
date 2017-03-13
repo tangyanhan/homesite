@@ -2,12 +2,11 @@ from __future__ import unicode_literals
 
 from django.db import models
 
-HASH_MAX_LENGTH = 32
-
 KEYWORD_MAX_LENGTH = 100
 
+
 class Video(models.Model):
-	path_hash = models.CharField(primary_key=True,max_length=HASH_MAX_LENGTH)
+	video_id = models.PositiveIntegerField(primary_key=True)
 	title = models.CharField(max_length=256,default='')
 	path = models.CharField(max_length=1024)
 	duration = models.PositiveSmallIntegerField(null=True)  # 0-32767 in seconds, about 9 hours at max
@@ -23,7 +22,7 @@ class KeywordCount(models.Model):
 	keyword = models.CharField(primary_key=True, null=False, max_length=KEYWORD_MAX_LENGTH)
 	count = models.PositiveIntegerField(default=0)
 
-class KeywordPathHash(models.Model):
+class KeywordVideoId(models.Model):
 	keyword = models.CharField(null=False,max_length=KEYWORD_MAX_LENGTH)
-	path_hash = models.CharField(null=False,max_length=HASH_MAX_LENGTH)
+	video_id = models.PositiveIntegerField(primary_key=True)
 
