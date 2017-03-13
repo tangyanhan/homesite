@@ -149,7 +149,7 @@ def loadSearchResultsWithKeyword(keys):
 			if key in SEARCH_CACHE[ key ]:
 				periodSet = SEARCH_CACHE[ key ]
 			else:
-				mergedRecords = chain(KeywordVideoId.objects.filter(keyword__icontains=keys), Video.objects.filter(title__icontains=keys))
+				mergedRecords = KeywordVideoId.objects.filter(keyword__icontains=keys).distinct('video_id')
 				for record in mergedRecords:
 					periodSet.add(record.video_id)
 

@@ -97,14 +97,14 @@ def buildKeywordDict():
 
 	del keywords
 
-	key_hash_list = KeywordVideoId.objects.all()
+	key_vid_list = KeywordVideoId.objects.all()
 
-	for kh in key_hash_list:
-		if kh.keyword in dict:
-			data = dict[ kh.keyword ]
-			data.files.add(kh.video_id)
+	for kv in key_vid_list:
+		if kv.keyword in dict:
+			data = dict[ kv.keyword ]
+			data.files.add(kv.video_id)
 		else:
-			print '#Keyword not found:', kh
+			print '#Keyword not found:', kv
 
 	return dict
 
@@ -115,7 +115,7 @@ def saveDictToDatabase(dict):
 		print '#', key, '#'
 		print 'Count:',data.count
 		for vid_id in data.files:
-			print "\t",vid_id
+			print "\tvideo_id",vid_id
 		if data.count > 0:
 			kcs = KeywordCount.objects.filter(keyword=key)
 			kc = None
