@@ -179,7 +179,8 @@ def keyword_suggest(request):
 		if len(keyword) > KEYWORD_MAX_LENGTH:
 			return HttpResponse('')
 
-		availableKeywords = KeywordCount.objects.filter(keyword__icontains=keyword)
+		# results ordered by count field in descending order
+		availableKeywords = KeywordCount.objects.filter(keyword__icontains=keyword).order_by('-count')
 
 		if len(availableKeywords) > 0:
 			sugList = []
@@ -188,11 +189,12 @@ def keyword_suggest(request):
 
 			return json.dumps(sugList)
 
+		return HttpResponse('',status=404)
 	except Exception as e:
 		exc_type, exc_value, exc_traceback = sys.exc_info()
 		print "*** print_exception:"
 		traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
-		return HttpResponse('')
+		return HttpResponse('',status=500)
 
 def video_import(request):
 	path = request.POST['path']

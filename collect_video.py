@@ -112,7 +112,7 @@ def saveDictToDatabase(dict):
 		print 'Count:',data.count
 		for hash in data.files:
 			print "\t",hash
-		if data.count > 2:
+		if data.count > 0:
 			kcs = KeywordCount.objects.filter(keyword=key)
 			kc = None
 			if len(kcs) > 0:
