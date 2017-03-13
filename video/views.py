@@ -116,6 +116,7 @@ def videos(request):
 		endIdx = int(beginIdx + RESULT_NUM_PER_PAGE)
 		if endIdx > len(results):
 			endIdx = len(results)
+
 		pageRecords = results[beginIdx:endIdx]
 
 		return render(request, 'video-index.html', {
@@ -148,18 +149,14 @@ def convertKeyword(keyword):
 
 def loadSearchResultsWithKeyword(keys):
 	try:
-		# Retrieve from cache first
-		if len(keys) == 1 and keys[0] in SEARCH_CACHE:
-			return SEARCH_CACHE[keys[0]]
-
+		# pdb.set_trace()
 		resultSet = set()
-
 		for key in keys:
 			periodSet = set()
-			if key in SEARCH_CACHE[ key ]:
+			if key in SEARCH_CACHE:
 				periodSet = SEARCH_CACHE[ key ]
 			else:
-				mergedRecords = KeywordVideoId.objects.filter(keyword__icontains=keys)
+				mergedRecords = KeywordVideoId.objects.filter(keyword__icontains=key)
 				for record in mergedRecords:
 					periodSet.add(record.video_id)
 
