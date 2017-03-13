@@ -43,7 +43,7 @@
         	})
 		});
 
-		function showSuggestionList(keywords) {
+function showSuggestionList(keywords) {
     if(keywords.length == 0) return
 
     var ul = $("#sug-list")
@@ -51,7 +51,7 @@
     for (var i = keywords.length - 1; i >= 0; i--) {
         li = document.createElement("li")
             a = document.createElement("a")
-            a.href = getLocation(keyword,0)
+            a.href = getLocation(keywords[i],0)
             a.innerHTML = keywords[i]
             li.append(a)
         ul.append(li)
@@ -154,6 +154,14 @@ function loadPage() {
 	var videoDiv = $("#videos")
 	videoDiv.empty() //remove old results
 
+	if( results.length == 0 ) {
+	    if(keyword.length == 0) {
+	        videoDiv.innerHTML = "目前没有收录任何视频"
+	    }else{
+	        videoDiv.innerHTML = "没有找到 <b>" + keyword + "</b> 的相关搜索结果"
+	    }
+	}
+
 	for(var i=0; i<results.length; i++) {
 		video = results[i]
 
@@ -217,16 +225,16 @@ function loadPage() {
         <div class="search container align-right">
             <div class="form search-bar">
                 <div class="search_form">
-                    <form name="search_query" method="get" action="#search-form" target="_self">
+                    <form name="search_query" method="get" action="{% url 'search' %}" target="_self">
                         <div id="search_query" target="_self">
                             <div>
                                 <span style="position:relative;" class="add-clear-span">
                                     <span style="position:relative;" class="add-clear-span">
-                                        <input type="search" id="search_query_query" name="search_query[query]" required="required" placeholder="输入关键词 ..." autocomplete="off" maxlength="200" value="">
+                                        <input type="search" id="search_query_query" name="keyword" required="required" placeholder="输入关键词 ..." autocomplete="off" maxlength="200" value="">
                                         <a href="#clear" style="display: none; color: rgb(204, 204, 204); text-decoration: none; line-height: 1; overflow: hidden; position: absolute; right: 4px; top: 1px;">
                                             <i class="fa fa-close fa-fw" style="display: inline;"></i>
                                         </a>
-                                            <ul id="sug-list" style="z-index:10; position:absolute;background-color: #fff;list-style-type: none;padding: 0;padding-left: 5px;margin: 0;border: 1px solid #ccc;border-top: none;display: block;">
+                                            <ul id="sug-list" style="z-index:10; width:100%;position:absolute;color:000;background-color: #fff;list-style-type: none;padding: 0;padding-left: 5px;margin: 0;border: 1px solid #ccc;border-top: none;display: block;">
                                             </ul>
                                     </span>
                                     <a href="http://somesite/cat/keyword#clear" style="display: none; color: rgb(204, 204, 204); text-decoration: none; line-height: 1; overflow: hidden; position: absolute; right: 4px; top: 1px;">

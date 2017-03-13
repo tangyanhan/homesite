@@ -76,6 +76,8 @@ def play(request,digest):
 
 def videos(request):
 	try:
+		print request
+
 		keyword = None
 		if 'keyword' in request.GET:
 			keyword = request.GET['keyword']
@@ -95,6 +97,14 @@ def videos(request):
 
 			keyword = ' '.join(keys)
 			results = loadSearchResultsWithKeyword(keys)
+
+		if len(results) == 0:
+			return render(request, 'video-index.html', {
+				'keyword': keyword,
+				'idx': idx,
+				'pageNum': 0,
+				'results': json.dumps([])}
+			              )
 
 		global RESULT_NUM_PER_PAGE
 		pageNum = math.ceil(len(results) / RESULT_NUM_PER_PAGE) # TODO: check if python has a same old ceil problem
