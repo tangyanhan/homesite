@@ -1,19 +1,24 @@
 function updatePageIndex(current,total,keyword,genUrl) {
-    pageIdx = document.getElementById("pageIdx")
+    pages = document.getElementById("pages")
 
-    pageIdx.innerHTML=""
-
+    pages.innerHTML = ""
     if(total > 1) {
+        //Added previous page if necessary
         if( current != 0 ) {
-            li = document.createElement("li")
-            a = document.createElement("a")
-            a.href=genUrl(keyword,current-1)
-            a.innerHTML = "< 上一页"
-
-            li.append(a)
-
-            pageIdx.append(li)
+            prev = document.createElement("span")
+            prev.setAttribute("class","next-page")
+                subPrev = document.createElement("span")
+                subPrev.setAttribute("class","previous")
+                    a = document.createElement("a")
+                    a.href = genUrl(keyword,current-1)
+                    a.innerHTML = "<i class=\"fa fa-chevron-left\"></i>"
+                    subPrev.append(a)
+                prev.append(subPrev)
+            pages.append(prev)
         }
+
+        numSpan = document.createElement("span")
+        numSpan.setAttribute("class","pages no-border-radius-right")
 
         for(var i=0; i<total; i++) {
             li = document.createElement("li")
@@ -22,34 +27,16 @@ function updatePageIndex(current,total,keyword,genUrl) {
             pgNum = i+1
 
             span = document.createElement("span")
-            span.setAttribute("class","pc")
-            span.innerHTML = pgNum
-
-            if(i == current) {
-                strong = document.createElement("strong")
-                strong.append(span)
-                li.append(strong)
-                li.style.border = "0"
-            }else{
+            span.setAttribute("class","page")
                 a = document.createElement("a")
+                a.innerHTML = pgNum
                 a.href = genUrl(keyword,i)
-                a.append(span)
-                li.append(a)
-            }
-
-            pageIdx.append(li)
+                if( i == current) {
+                    a.setAttribute("class","current")
+                }
+                span.append(a)
+            numSpan.append(span)
         }
-
-        if( current != (total-1) ) {
-            li = document.createElement("li")
-            a = document.createElement("a")
-            a.href=genUrl(keyword,current-1)
-            a.innerHTML = "< 下一页"
-
-            li.append(a)
-
-            pageIdx.append(li)
-        }
+        pages.append(numSpan)
     }
-
 }
