@@ -105,11 +105,28 @@
             <div class="form search-bar">
                 <div class="search_form">
                     <form name="search_query" method="get" action="#search-form" target="_self">
-                        <div id="search_query" target="_self"><div><span style="position:relative;" class="add-clear-span"><span style="position:relative;" class="add-clear-span"><input type="search" id="search_query_query" name="search_query[query]" required="required" placeholder="Search ..." autocomplete="off" maxlength="200" value="Current Search Keyword"><a href="#clear" style="display: none; color: rgb(204, 204, 204); text-decoration: none; line-height: 1; overflow: hidden; position: absolute; right: 4px; top: 1px;"><i class="fa fa-close fa-fw" style="display: inline;"></i></a></span><a href="http://somesite/cat/keyword#clear" style="display: none; color: rgb(204, 204, 204); text-decoration: none; line-height: 1; overflow: hidden; position: absolute; right: 4px; top: 1px;"><i class="fa fa-close fa-fw" style="display: inline;"></i></a></span></div><div><div id="search_query_tag_list"></div></div></div>
-                    <button type="submit" value="" class="fa fa-search fa-2x"></button>
-                    <div class="autocomplete"></div></form>
+                        <div id="search_query" target="_self">
+                            <div>
+                                <span style="position:relative;" class="add-clear-span">
+                                    <span style="position:relative;" class="add-clear-span">
+                                        <input type="search" id="search_query_query" name="search_query[query]" required="required" placeholder="输入关键词 ..." autocomplete="off" maxlength="200" value="当前搜索关键词">
+                                        <a href="#clear" style="display: none; color: rgb(204, 204, 204); text-decoration: none; line-height: 1; overflow: hidden; position: absolute; right: 4px; top: 1px;">
+                                            <i class="fa fa-close fa-fw" style="display: inline;"></i>
+                                        </a>
+                                    </span>
+                                    <a href="http://somesite/cat/keyword#clear" style="display: none; color: rgb(204, 204, 204); text-decoration: none; line-height: 1; overflow: hidden; position: absolute; right: 4px; top: 1px;">
+                                        <i class="fa fa-close fa-fw" style="display: inline;"></i>
+                                    </a>
+                                </span>
+                            </div>
+                            <div>
+                                <div id="search_query_tag_list"></div>
+                            </div>
+                        </div>
+                        <button type="submit" value="" class="fa fa-search fa-2x"></button>
+                        <div class="autocomplete"></div>
+                    </form>
                 </div>
-
             </div>
             <div class="filter form tag"></div>
         </div>
