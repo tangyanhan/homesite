@@ -178,6 +178,7 @@ function loadPage() {
 					a.href = "/play/" + video.id
 						img = document.createElement("img")
 						img.src = "{% static 'thumb/' %}" + video.id + ".png"
+						img.setAttribute("data-image-error-source","{% static 'images/no-img.png' %}")
 					a.append(img)
 				spanImg.append(a)
 		thumbContainer.append(spanImg)
@@ -203,8 +204,28 @@ function loadPage() {
 
 	//recreate page index if necessary
 	updatePageIndex(pageIndex, pageNum, keyword, getLocation)
+
+	$("pagination-summary").innerHTML = ""
+	if( results.length > 0 ) {
+	    if( keyword.length > 0 ) {
+	        $("pagination-summary").innerHTML = "Showing " + results.length + " results on page " + (pageIndex + 1) + " of " + pageNum + "using keyword:" + keyword
+	    }else{
+	        $("pagination-summary").innerHTML = "Showing " + results.length + " results on page " + (pageIndex + 1) + " of " + pageNum
+	    }
+	}
 }
     </script>
+    <style>
+        #sug-list a{
+            font-size: 80%;
+        }
+        #sug-list a:link{
+            color:gray;
+        }
+        #sug-list a:visited{
+            color:purple;
+        }
+    </style>
 </head>
 
 <header>
@@ -217,7 +238,7 @@ function loadPage() {
     <div class="header column container">
         <div class="logo">
             <a href="{{ site.url }}" title="">
-                <img src="logo.png" alt="header logo" class="logo">
+                <img src="{% static 'images/logo.png' %}" alt="header logo" class="logo">
             </a>
         </div>
         <span class="page-title">视频</span>
@@ -266,8 +287,8 @@ function loadPage() {
 
 <div class="content-navigation-bottom">
     <div class="paging">
-        <div class="pagination-summary" data-total="32,846" data-first="1" data-last="120">
-            Showing 1 - 120 of 32,846 for 'keyword'
+        <div class="pagination-summary" data-total="" data-first="" data-last="">
+
         </div>
         <div class="page-numbers">
             <div id="pages" class="pagination">
