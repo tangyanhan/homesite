@@ -181,13 +181,14 @@ def visitDir(baseDir):
 				if ext.lower() != 'mp4':
 					needConvert = True
 					# Disable video convert for the time being, we should convert them in idle time
-					if False:
+					if True:
 						mp4Path = os.path.join(fileDir, fileName)
 						mp4Path += '.mp4'
 						if not convert_video_to_mp4(file, mp4Path):
 							print '#Failed to convert file to mp4:', file
 							continue
 						else:
+							needConvert = False
 							file = mp4Path
 							ext = 'mp4'
 
@@ -276,9 +277,12 @@ def convert_video_to_mp4(videoPath,destPath):
 	if os.path.isfile(destPath):
 		print '#Already converted,skip:',destPath
 		return True
+	print '#Converting ',videoPath,'=>',destPath
 
-	cmd = ['ffmpeg', '-i', '-vcodec', 'h264', '-acodec', 'aac', destPath]
+	cmd = ['ffmpeg', '-i', videoPath, '-vcodec', 'h264', '-acodec', 'aac', destPath]
 	p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+
+	p.communicate()
 
 	# Remove old if succeeded
 	if os.path.isfile(destPath) and os.path.getsize(destPath) > 0:
