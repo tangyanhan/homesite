@@ -1,12 +1,11 @@
 <head>
-  <link href="http://vjs.zencdn.net/vjs-version/video-js.css" rel="stylesheet">
-
-  <!-- If you'd like to support IE8 -->
-  <script src="http://vjs.zencdn.net/ie8/ie8-version/videojs-ie8.min.js"></script>
+  {% load static %}
+  <link href="{% static 'css/video-js.min.css' %}" rel="stylesheet">
+  <link href="{% static 'css/font-awesome.min.css' %}" rel="stylesheet">
+  <link href="{% static 'css/stylesheet.css' %}" rel="stylesheet">
 </head>
 
 <body>
-{% load static %}
   <video id="my-video" class="video-js" controls preload="auto" width="640" height="264"
   poster="{% static thumb %}" data-setup="{}" ontimeupdate="myFunction(this)">
      <!-- source src="{% static video %}" type="video/mp4" -->
@@ -16,6 +15,12 @@
       <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
     </p>
   </video>
-
-  <script src="http://vjs.zencdn.net/vjs-version/video.js"></script>
+  <button class="vjs-big-play-button" type="button" aria-live="polite" title="Play Video" aria-disabled="false">
+    <!--<span class="vjs-control-text">Play Video</span> -->
+  </button>
+  <script src="{% static 'js/video.min.js' %}"></script>
+  <i class="fa fa-thumbs-up">16</i>
+  <i class="fa fa-thumbs-down">5</i>
+  <button value="" class="fa fa-thumbs-up btn">16</button>
+  <button value="" class="fa fa-thumbs-down ">5</button>
 </body>
