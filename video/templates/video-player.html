@@ -3,11 +3,36 @@
   <link href="{% static 'css/video-js.min.css' %}" rel="stylesheet">
   <link href="{% static 'css/font-awesome.min.css' %}" rel="stylesheet">
   <link href="{% static 'css/stylesheet.css' %}" rel="stylesheet">
+  <script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/search-bar.js' %}"></script>
+  <style>
+    .fa.fa-thumbs-up, fa.fa-thumbs-down{
+      cursor:pointer;
+    }
+  </style>
+  <script>
+    $(document).ready( function(){
+      loadRate(0)
+    });
+    function loadRate(option){
+      	$.post("{% url 'rate-video' %}", { 'id':{{ video }}, 'op':option,'csrfmiddlewaretoken': getCookie('csrftoken')},
+			function(data,status){
+			if(status == "success"){
+				//var counts = JSON.parse(data)
+				likeCount = data["like"]
+				dislikeCount = data["dislike"]
+
+				$("i.fa.fa-thumbs-up").text(likeCount)
+				$("i.fa.fa-thumbs-down").text(dislikeCount)
+			}
+		})
+    }
+  </script>
 </head>
 
 <body>
   <video id="my-video" class="video-js" controls preload="auto" width="640" height="264"
-  poster="{% static thumb %}" data-setup="{}" ontimeupdate="myFunction(this)">
+  poster="{% static thumb %}" data-setup="{}" ontimeupdate="">
      <!-- source src="{% static video %}" type="video/mp4" -->
       <source src="{% url 'stream' video %}" type="video/mp4">
     <p class="vjs-no-js">
@@ -19,8 +44,7 @@
     <!--<span class="vjs-control-text">Play Video</span> -->
   </button>
   <script src="{% static 'js/video.min.js' %}"></script>
-  <i class="fa fa-thumbs-up">16</i>
-  <i class="fa fa-thumbs-down">5</i>
-  <button value="" class="fa fa-thumbs-up btn">16</button>
-  <button value="" class="fa fa-thumbs-down ">5</button>
+  <i class="fa fa-thumbs-up" onclick="loadRate(1)">0</i>
+  &nbsp &nbsp
+  <i class="fa fa-thumbs-down" onclick="loadRate(-1)">0</i>
 </body>
