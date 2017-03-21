@@ -21,15 +21,18 @@ import settings
 
 from video import video_stream
 from video import views as video_views
+from video import player_view
 from live import views as live_views
 
 urlpatterns = [
 		url(r'^$', video_views.videos, name='video-index'),
-		url(r'^play/([a-f0-9]+)$', video_views.play,name='play'),
+		# Player View
+		url(r'^play/([a-f0-9]+)$', player_view.play,name='play'),
+		url(r'^rate/', player_view.rate, name='rate-video'),
+		url(r'^recommend/([a-f0-9]+)$', player_view.recommend, name='recommend'),
 		url(r'^stream/([a-f0-9]+)$', video_stream.stream, name='stream'),
 		url(r'^search.*$', video_views.videos, name='search'),
 		url(r'^suggest/', video_views.keyword_suggest, name='keyword_suggest'),
-		url(r'^rate/', video_views.rate_video, name='rate-video'),
 		url(r'^live-post/(\d+)$', live_views.post, name='live-post'),
 		url(r'^live/(\d+)$', live_views.live, name='live'),
 		url(r'^admin/', admin.site.urls),
