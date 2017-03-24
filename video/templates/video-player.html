@@ -1,18 +1,55 @@
 <head>
   {% load static %}
-  <link href="{% static 'css/video-js.min.css' %}" rel="stylesheet">
-  <link href="{% static 'css/font-awesome.min.css' %}" rel="stylesheet">
-  <link href="{% static 'css/stylesheet.css' %}" rel="stylesheet">
   <script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
-  <script type="text/javascript" src="{% static 'js/search-bar.js' %}"></script>
+
+  <link href="{% static 'bootstrap-3.3.7/css/bootstrap.css' %}" rel="stylesheet">
   <style>
     .fa.fa-thumbs-up, fa.fa-thumbs-down{
       cursor:pointer;
     }
+
+    #vidStatus{
+      /* Center */
+      position: absolute;
+      margin: auto;
+      top: 0; left: 0; bottom: 0; right: 0;
+      width:100px;
+      height:60px;
+      color:white;
+      background:black;
+      opacity:0.7;
+      border-radius:6px;
+      border-width:0;
+      z-index:5;
+    }
+
   </style>
   <script>
     $(document).ready( function(){
       loadRate(0)
+      loadRecommendVideos()
+
+      $("i.glyphicon.glyphicon-thumbs-up").click( function(){
+        loadRate(1)
+      } )
+
+      $("i.glyphicon.glyphicon-thumbs-down").click( function(){
+        loadRate(-1)
+      } )
+
+      $("video #vidStatus").click(function(){
+        var video = $("video")
+        var vidStatus = $("#vidStatus")
+        if( video.paused ) {
+          video.play()
+          vidStatus.setAttribute("class","fui-pause")
+          vidStatus.hide()
+        }else{
+          video.pause()
+          vidStatus.setAttribute("class","fui-play")
+          vidStatus.show()
+        }
+      })
     });
     function loadRate(option){
       	$.post("{% url 'rate-video' %}", { 'id':{{ video }}, 'op':option,'csrfmiddlewaretoken': getCookie('csrftoken')},
@@ -22,29 +59,68 @@
 				likeCount = data["like"]
 				dislikeCount = data["dislike"]
 
-				$("i.fa.fa-thumbs-up").text(likeCount)
-				$("i.fa.fa-thumbs-down").text(dislikeCount)
+				$("i.glyphicon.glyphicon-thumbs-up").text(likeCount)
+				$("i.glyphicon.glyphicon-thumbs-down").text(dislikeCount)
 			}
 		})
+    }
+
+    function loadRecommendVideos(){
+      $.post("{% url 'recommend-videos' %}", { 'id':{{ video }} },
+        function(data,status){
+          var vidList = $("#vid-list")
+          vidList.empty()
+          for( vid in data ) {
+            li = document.createElement("li")
+            li.setAttribute("class","row")
+
+            thumb = document.createElement("img")
+            thumb.src = "/static/thumb/" + vid + ".png"
+            thumb.setAttribute("class","col-md-4")
+
+            title = document.createElement("i")
+            title.innerHTML = vid.title
+            title.setAttribute("class","col-md-8")
+
+            li.append(thumb)
+            li.append(title)
+            vidList.append(li)
+          }
+      })
     }
   </script>
 </head>
 
 <body>
-  <video id="my-video" class="video-js" controls preload="auto" width="640" height="264"
-  poster="{% static thumb %}" data-setup="{}" ontimeupdate="">
-     <!-- source src="{% static video %}" type="video/mp4" -->
+<div class="container">
+<div class="row">
+  <div class="col-xs-12 col-md-10">
+    <video controls="controls" preload="auto" width="100%" height="auto">
       <source src="{% url 'stream' video %}" type="video/mp4">
-    <p class="vjs-no-js">
-      To view this video please enable JavaScript, and consider upgrading to a web browser that
-      <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
-    </p>
-  </video>
-  <button class="vjs-big-play-button" type="button" aria-live="polite" title="Play Video" aria-disabled="false">
-    <!--<span class="vjs-control-text">Play Video</span> -->
-  </button>
-  <script src="{% static 'js/video.min.js' %}"></script>
-  <i class="fa fa-thumbs-up" onclick="loadRate(1)">0</i>
-  &nbsp &nbsp
-  <i class="fa fa-thumbs-down" onclick="loadRate(-1)">0</i>
+    </video>
+    <button id="vidStatus"><i class="glyphicon glyphicon-play"></i></button>
+    <div class="row">
+      <i class="glyphicon glyphicon-thumbs-up"></i>
+      <i>   </i>
+      <i class="glyphicon glyphicon-thumbs-down"></i>
+  </div>
+  </div>
+  <div class="col-xs-12 col-md-2" style="maigin:0;max-height:400px;overflow:auto;">
+      <ul id="vid-list">
+        <li><h2>1</h2></li>
+        <li><h2>2</h2></li>
+        <li><h2>3</h2></li>
+        <li><h2>4</h2></li>
+        <li><h2>5</h2></li>
+        <li><h2>6</h2></li>
+        <li><h2>7</h2></li>
+        <li><h2>8</h2></li>
+        <li><h2>9</h2></li>
+        <li><h2>10</h2></li>
+      </ul>
+  </div>
+</div>
+</div>
+  <script type="text/javascript" src="{% static 'bootstrap-3.3.7/js/bootstrap.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/search-bar.js' %}"></script>
 </body>

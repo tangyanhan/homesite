@@ -7,6 +7,11 @@ from django.views.decorators.csrf import csrf_exempt
 from models import Video
 from models import KeywordCount
 from models import KeywordVideoId
+from views import loadRecentRecords
+from views import dictForVideo
+import os
+import sys
+import pdb
 
 def play(request,digest):
 	return render(request,'video-player.html', {'video':digest, 'thumb':'thumb/'+ digest +'.png'})
@@ -43,6 +48,54 @@ def rate(request):
 		traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
 		return HttpResponse('',status=500)
 
+
 # Recommend videos in player page. So users can play at their own interest
+@csrf_exempt
 def recommend(request):
-    pass
+	try:
+		MAX_NUM = 10
+
+		video_id = request.POST['id']
+
+		print 'recommend:',video_id
+
+		# pdb.set_trace()
+		video = Video.objects.filter(video_id=video_id)[0]
+
+		vidList = []
+		checkSet = set()
+		checkSet.add(video_id)
+		# First, look for videos in the same directory
+		dir = os.path.splitext(video.path)[0]
+
+		#BUG BUG: Bug here
+		if len(dir)>0:
+			videosInSameDir = Video.objects.extra(where=["%s LIKE path_prefix||'%%"], params=[dir])
+			for vid in videosInSameDir:
+				checkSet.add(vid.video_id)
+				vidList.append(dictForVideo(vid))
+
+		if len(vidList) < MAX_NUM:
+			# Second, look for videos with similar keywords
+			keywords = KeywordVideoId.objects.filter(video_id=video_id)
+			for record in keywords:
+				keyword = record.keyword
+				videos = KeywordVideoId.objects.filter(keyword=keyword)
+				for vid in videos:
+					if vid.video_id not in checkSet:
+						checkSet.add(vid.video_id)
+						vidList.append(dictForVideo(vid))
+			# Third, look for recently added
+			if len(vidList) < MAX_NUM:
+				recentRecords = loadRecentRecords()
+				for record in recentRecords:
+					if record.id not in checkSet:
+						checkSet.add(record.id)
+						vidList.append(record)
+		# Trim if necessary
+		if len(vidList) > MAX_NUM:
+			vidList = vidList[0:MAX_NUM]
+
+		return JsonResponse(vidList)
+	except Exception as e:
+		return HttpResponse('', status=500)

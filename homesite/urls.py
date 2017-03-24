@@ -29,7 +29,7 @@ urlpatterns = [
 		# Player View
 		url(r'^play/([a-f0-9]+)$', player_view.play,name='play'),
 		url(r'^rate/', player_view.rate, name='rate-video'),
-		url(r'^recommend/([a-f0-9]+)$', player_view.recommend, name='recommend'),
+		url(r'^recommend/', player_view.recommend, name='recommend-videos'),
 		url(r'^stream/([a-f0-9]+)$', video_stream.stream, name='stream'),
 		url(r'^search.*$', video_views.videos, name='search'),
 		url(r'^suggest/', video_views.keyword_suggest, name='keyword_suggest'),
