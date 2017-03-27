@@ -70,12 +70,13 @@
         function(data,status){
           var vidList = $("#vid-list")
           vidList.empty()
-          for( vid in data ) {
+          var videos = data['videos']
+          for( vid in videos ) {
             li = document.createElement("li")
             li.setAttribute("class","row")
 
             thumb = document.createElement("img")
-            thumb.src = "/static/thumb/" + vid + ".png"
+            thumb.src = "/static/thumb/" + vid.id + ".png"
             thumb.setAttribute("class","col-md-4")
 
             title = document.createElement("i")

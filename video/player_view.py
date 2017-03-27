@@ -12,6 +12,7 @@ from views import dictForVideo
 import os
 import sys
 import pdb
+import re
 
 def play(request,digest):
 	return render(request,'video-player.html', {'video':digest, 'thumb':'thumb/'+ digest +'.png'})
@@ -55,26 +56,35 @@ def recommend(request):
 	try:
 		MAX_NUM = 10
 
-		video_id = request.POST['id']
+		video_id = int(request.POST['id'])
 
 		print 'recommend:',video_id
 
-		# pdb.set_trace()
 		video = Video.objects.filter(video_id=video_id)[0]
 
 		vidList = []
 		checkSet = set()
 		checkSet.add(video_id)
 		# First, look for videos in the same directory
-		dir = os.path.splitext(video.path)[0]
 
+		file_name_reg = re.compile(r'(.*)/[^/]+$', re.UNICODE | re.IGNORECASE)
+		dir = file_name_reg.search(video.path).groups()[0]
+
+		print 'File Dir:',dir
+		print '#1:Search in dir'
 		#BUG BUG: Bug here
 		if len(dir)>0:
-			videosInSameDir = Video.objects.extra(where=["%s LIKE path_prefix||'%%"], params=[dir])
+			videosInSameDir = Video.objects.filter(path__contains=dir)
 			for vid in videosInSameDir:
-				checkSet.add(vid.video_id)
-				vidList.append(dictForVideo(vid))
+				if vid.video_id not in checkSet:
+					checkSet.add(vid.video_id)
+					vidList.append(dictForVideo(vid))
 
+		for item in vidList:
+			print item
+
+		print '#2:Keywords related'
+		# pdb.set_trace()
 		if len(vidList) < MAX_NUM:
 			# Second, look for videos with similar keywords
 			keywords = KeywordVideoId.objects.filter(video_id=video_id)
@@ -84,8 +94,10 @@ def recommend(request):
 				for vid in videos:
 					if vid.video_id not in checkSet:
 						checkSet.add(vid.video_id)
-						vidList.append(dictForVideo(vid))
+						video = Video.objects.filter(video_id=video_id)[0]
+						vidList.append(dictForVideo(video))
 			# Third, look for recently added
+			print '#3:Look for recent videos'
 			if len(vidList) < MAX_NUM:
 				recentRecords = loadRecentRecords()
 				for record in recentRecords:
@@ -96,6 +108,6 @@ def recommend(request):
 		if len(vidList) > MAX_NUM:
 			vidList = vidList[0:MAX_NUM]
 
-		return JsonResponse(vidList)
+		return JsonResponse({'videos':vidList})
 	except Exception as e:
 		return HttpResponse('', status=500)
