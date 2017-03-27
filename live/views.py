@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from django.http.response import HttpResponse
 
-# Create your views here.
+def index(request):
+	return HttpResponse('live index not yet implemented')
+
 def live(request, live_id):
 	return HttpResponse('live to be implemented')
 

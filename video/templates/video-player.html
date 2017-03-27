@@ -3,6 +3,7 @@
   <script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
 
   <link href="{% static 'bootstrap-3.3.7/css/bootstrap.css' %}" rel="stylesheet">
+  <!-- link href="{% static 'css/stylesheet.css' %}" rel="stylesheet" -->
   <style>
     .fa.fa-thumbs-up, fa.fa-thumbs-down{
       cursor:pointer;
@@ -71,7 +72,8 @@
           var vidList = $("#vid-list")
           vidList.empty()
           var videos = data['videos']
-          for( vid in videos ) {
+          for( var i=0; i<videos.length; i++ ) {
+            vid = videos[i]
             li = document.createElement("li")
             li.setAttribute("class","row")
 
@@ -93,6 +95,9 @@
 </head>
 
 <body>
+
+{% include 'nav.html' %}
+
 <div class="container">
 <div class="row">
   <div class="col-xs-12 col-md-10">
@@ -108,16 +113,6 @@
   </div>
   <div class="col-xs-12 col-md-2" style="maigin:0;max-height:400px;overflow:auto;">
       <ul id="vid-list">
-        <li><h2>1</h2></li>
-        <li><h2>2</h2></li>
-        <li><h2>3</h2></li>
-        <li><h2>4</h2></li>
-        <li><h2>5</h2></li>
-        <li><h2>6</h2></li>
-        <li><h2>7</h2></li>
-        <li><h2>8</h2></li>
-        <li><h2>9</h2></li>
-        <li><h2>10</h2></li>
       </ul>
   </div>
 </div>

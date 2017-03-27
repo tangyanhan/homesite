@@ -9,6 +9,7 @@
     <script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/search-bar.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/pageidx.js' %}"></script>
+    <link href="{% static 'bootstrap-3.3.7/css/bootstrap.css' %}" rel="stylesheet">
     <script>
 		$(document).ready( function(){
 		    $("#sug-list").hide()
@@ -234,6 +235,8 @@ function loadPage() {
 
 <body>
 
+{% include 'nav.html' %}
+
 <div class="header row container">
     <div class="header column container">
         <div class="logo">
@@ -285,17 +288,11 @@ function loadPage() {
 <ul class="content row container" id="videos">
 </ul>
 
-<div class="content-navigation-bottom">
-    <div class="paging">
-        <div class="pagination-summary" data-total="" data-first="" data-last="">
+<nav aria-label="Page navigation">
+  <ul id="pages" class="pagination">
+  </ul>
+</nav>
 
-        </div>
-        <div class="page-numbers">
-            <div id="pages" class="pagination">
-            </div>
-        </div>
-    </div>
-</div>
 
 </body>
 </html>

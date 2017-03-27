@@ -5,38 +5,50 @@ function updatePageIndex(current,total,keyword,genUrl) {
     if(total > 1) {
         //Added previous page if necessary
         if( current != 0 ) {
-            prev = document.createElement("span")
-            prev.setAttribute("class","next-page")
-                subPrev = document.createElement("span")
-                subPrev.setAttribute("class","previous")
-                    a = document.createElement("a")
-                    a.href = genUrl(keyword,current-1)
-                    a.innerHTML = "<i class=\"fa fa-chevron-left\"></i>"
-                    subPrev.append(a)
-                prev.append(subPrev)
-            pages.append(prev)
-        }
+          li = document.createElement("li")
+              a = document.createElement("a")
+              a.href = genUrl(keyword,current-1)
+              a.setAttribute("aria-label", "Previous")
+                span = document.createElement("span")
+                span.setAttribute("aria-hidden","true")
+                span.innerHTML = "«"
+              a.append(span)
+          li.append(a)
 
-        numSpan = document.createElement("span")
-        numSpan.setAttribute("class","pages no-border-radius-right")
+          pages.append(li)
+        }
 
         for(var i=0; i<total; i++) {
             li = document.createElement("li")
-            li.id = "page-num"
+            //li.id = "page-num"
 
             pgNum = i+1
 
-            span = document.createElement("span")
-            span.setAttribute("class","page")
-                a = document.createElement("a")
-                a.innerHTML = pgNum
-                a.href = genUrl(keyword,i)
-                if( i == current) {
-                    a.setAttribute("class","current")
-                }
-                span.append(a)
-            numSpan.append(span)
+            if(i == current) {
+                li.setAttribute("class","active")
+            }
+
+            a = document.createElement("a")
+            a.href = genUrl(keyword,i)
+            a.innerHTML = pgNum
+
+            li.append(a)
+
+            pages.append(li)
         }
-        pages.append(numSpan)
+
+        if( (current+1) < total ) {
+          li = document.createElement("li")
+              a = document.createElement("a")
+              a.href = genUrl(keyword,current-1)
+              a.setAttribute("aria-label", "Next")
+                span = document.createElement("span")
+                span.setAttribute("aria-hidden","true")
+                span.innerHTML = "»"
+              a.append(span)
+          li.append(a)
+
+          pages.append(li)
+        }
     }
 }

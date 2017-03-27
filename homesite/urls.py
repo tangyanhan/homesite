@@ -16,6 +16,7 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from django.conf.urls.static import static
+from django.contrib.auth import views as auth_views
 
 import settings
 
@@ -35,5 +36,7 @@ urlpatterns = [
 		url(r'^suggest/', video_views.keyword_suggest, name='keyword_suggest'),
 		url(r'^live-post/(\d+)$', live_views.post, name='live-post'),
 		url(r'^live/(\d+)$', live_views.live, name='live'),
-		url(r'^admin/', admin.site.urls),
+		url(r'^live/$', live_views.index, name='live-index'),
+		url(r'^admin/', admin.site.urls, name='admin'),
+		url(r'^accounts/login/$', auth_views.login),
 			] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

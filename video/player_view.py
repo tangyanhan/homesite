@@ -13,13 +13,18 @@ import os
 import sys
 import pdb
 import re
+from django.contrib.auth.decorators import login_required
 
+@login_required
 def play(request,digest):
 	return render(request,'video-player.html', {'video':digest, 'thumb':'thumb/'+ digest +'.png'})
 
-@csrf_exempt # TODO: should use auth
+#@csrf_exempt # TODO: should use auth
 def rate(request):
 	try:
+		if not request.user.is_authenticated:
+			pass
+
 		video_id = request.POST['id']
 
 		option = int(request.POST['op'])
