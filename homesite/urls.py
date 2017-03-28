@@ -24,6 +24,7 @@ from video import video_stream
 from video import views as video_views
 from video import player_view
 from live import views as live_views
+from manage_videos import views as video_manage_views
 
 urlpatterns = [
 		url(r'^$', video_views.videos, name='video-index'),
@@ -39,4 +40,5 @@ urlpatterns = [
 		url(r'^live/$', live_views.index, name='live-index'),
 		url(r'^admin/', admin.site.urls, name='admin'),
 		url(r'^accounts/login/$', auth_views.login),
+		url(r'^manage/', video_manage_views.index, name='manage'),
 			] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

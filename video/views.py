@@ -165,9 +165,9 @@ def loadSearchResultsWithKeyword(keys):
 
 		results = []
 		for video_id in resultSet:
-			videos = Video.objects.filter(video_id=video_id)
-			if len(videos) > 0:
-				dict = dictForVideo(videos[0])
+			video = Video.objects.get(video_id=video_id)
+			if video is not None:
+				dict = dictForVideo(video)
 				results.append(dict)
 		return results
 	except:
@@ -206,13 +206,13 @@ def video_import(request):
 
 def handler404(request):
     response = render_to_response('404.html', {},
-                                  context_instance=RequestContext(request))
+                                  context=RequestContext(request))
     response.status_code = 404
     return response
 
 
 def handler500(request):
     response = render_to_response('500.html', {},
-                                  context_instance=RequestContext(request))
+                                  context=RequestContext(request))
     response.status_code = 500
     return response

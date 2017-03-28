@@ -117,11 +117,8 @@ def saveDictToDatabase(dict):
 		for vid_id in data.files:
 			print "\tvideo_id",vid_id
 		if data.count > 0:
-			kcs = KeywordCount.objects.filter(keyword=key)
-			kc = None
-			if len(kcs) > 0:
-				kc = kcs[0]
-			else:
+			kc = KeywordCount.objects.get(keyword=key)
+			if kc is None:
 				kc = KeywordCount()
 			kc.keyword = key
 			kc.count = data.count
@@ -194,12 +191,9 @@ def visitDir(baseDir):
 
 				video_id = nextVideoId()
 
-				existObjects = Video.objects.filter(video_id=video_id)
+				video = Video.objects.get(video_id=video_id)
 
-				video = None
-				if len(existObjects) == 1:
-					video = existObjects[0]
-				else:
+				if video is None:
 					video = Video()
 					video.video_id = video_id
 					video.need_convert = needConvert

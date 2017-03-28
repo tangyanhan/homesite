@@ -45,12 +45,12 @@ class RangeFileWrapper(object):
 
 def stream(request, digest):
 
-	videos = Video.objects.filter(video_id=digest)
+	video = Video.objects.get(video_id=digest)
 
-	if len(videos) == 0:
+	if video is None:
 		return render(request, '404.html')
 
-	path = videos[0].path
+	path = video.path
 
 	range_header = request.META.get('HTTP_RANGE', '').strip()
 	range_match = range_re.match(range_header)

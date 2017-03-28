@@ -65,7 +65,7 @@ def recommend(request):
 
 		print 'recommend:',video_id
 
-		video = Video.objects.filter(video_id=video_id)[0]
+		video = Video.objects.get(video_id=video_id)
 
 		vidList = []
 		checkSet = set()
@@ -99,7 +99,7 @@ def recommend(request):
 				for vid in videos:
 					if vid.video_id not in checkSet:
 						checkSet.add(vid.video_id)
-						video = Video.objects.filter(video_id=video_id)[0]
+						video = Video.objects.get(video_id=video_id)
 						vidList.append(dictForVideo(video))
 			# Third, look for recently added
 			print '#3:Look for recent videos'
