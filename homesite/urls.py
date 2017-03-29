@@ -40,5 +40,6 @@ urlpatterns = [
 		url(r'^live/$', live_views.index, name='live-index'),
 		url(r'^admin/', admin.site.urls, name='admin'),
 		url(r'^accounts/login/$', auth_views.login),
-		url(r'^manage/', video_manage_views.index, name='manage'),
+		url(r'^manage/$', video_manage_views.index, name='manage'),
+		url(r'^manage/load-dir/$', video_manage_views.load_dir, name='load-dir'),
 			] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

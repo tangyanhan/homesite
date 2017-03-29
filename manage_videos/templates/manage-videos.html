@@ -5,8 +5,79 @@
     <meta charset="UTF-8">
     <title>Videos Management</title>
     <link href="{% static 'bootstrap-3.3.7/css/bootstrap.css' %}" rel="stylesheet">
+    <script src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
     <script src="{% static 'bootstrap-3.3.7/js/bootstrap.js' %}"></script>
+    <script src="{% static 'js/search-bar.js' %}"></script>
     <script>
+        $(document).ready( function(){
+            loadDir("")
+        })
+
+        function stringEndsWith(str,c) {
+            if(str==undefined || str.length == 0) return false
+
+            return str.charAt( str.length - 1 ) == c
+        }
+
+        function loadDir(dir) {
+            if(dir==undefined) {
+                dir = ""
+            }
+
+            $.post("{% url 'load-dir' %}", { 'dir':dir, 'csrfmiddlewaretoken': getCookie('csrftoken')},
+                function(data,status){
+                if(status == "success"){
+                    var currentDir = data['currentDir']
+                    if( currentDir.length > 0 && currentDir[currentDir.length-1] != '/' ) {
+                        currentDir += '/'
+                    }
+                    var list = data['files']
+
+                    $("#import_dir").attr("onclick") = "importDir(" + currentDir + ")"
+
+                    dirName = (currentDir.length > 0) ? currentDir : "/"
+                    $("#dirname").text(dirName)
+
+                    var fileList = $("#filelist")
+                    fileList.empty()
+
+                    if( currentDir.length > 0 ) {
+                        li = document.createElement("li")
+                        event = 'loadDir("' + currentDir + '..")'
+                        li.setAttribute("onclick",event)
+                        li.setAttribute("class","btn btn-link")
+                        li.innerHTML = '..'
+                        fileList.append(li)
+                    }
+
+                    for(var i=0; i<list.length; i++) {
+                        var entry = list[i]
+
+                        li = document.createElement("li")
+
+                        li.innerHTML = entry.file
+                        if(entry.isdir){
+                            path = currentDir + entry.file
+                            event = 'loadDir("' + path + '")'
+                            li.setAttribute("onclick",event)
+                            li.setAttribute("class","btn btn-link")
+                        }
+
+                        fileList.append(li)
+                    }
+                }
+		    })
+        }
+
+        function importDir(dir){
+            $.post("{% url 'load-dir' %}", { 'dir':dir, 'csrfmiddlewaretoken': getCookie('csrftoken')},
+                function(data,status){
+                if(status == "success"){
+                    //TODO: to be implemented
+                }
+            })
+        }
+
         function checkAll(){
 
         }
@@ -19,8 +90,8 @@
 
 <ul id="myTab" class="nav nav-tabs">
 	<li class="active">
-		<a href="#home" data-toggle="tab">
-			 菜鸟教程
+		<a href="#import" data-toggle="tab">
+			 Import
 		</a>
 	</li>
     <li><a href="#videos" data-toggle="tab">Videos</a> </li>
@@ -37,8 +108,15 @@
 	</li>
 </ul>
 <div id="myTabContent" class="tab-content">
-	<div class="tab-pane fade in active" id="home">
-		<p>菜鸟教程是一个提供最新的web技术站点，本站免费提供了建站相关的技术文档，帮助广大web技术爱好者快速入门并建立自己的网站。菜鸟先飞早入行——学的不仅是技术，更是梦想。</p>
+	<div class="tab-pane fade in active panel panel-primary" id="import">
+        <div class="panel-heading"><h2 id="dirname" class="panel-title"></h2></div>
+        <ul class="panel-body" id="filelist">
+        </ul>
+        <div class="panel-footer clearfix">
+            <div class="pull-right">
+                <button id="import_dir" class="btn btn-primary">Import</button>
+            </div>
+        </div>
 	</div>
 	<div class="tab-pane fade" id="ios">
 		<p>iOS 是一个由苹果公司开发和发布的手机操作系统。最初是于 2007 年首次发布 iPhone、iPod Touch 和 Apple

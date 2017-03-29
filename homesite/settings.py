@@ -42,6 +42,12 @@ if cfgDict[ 'allowed_hosts' ] is not None:
     hosts = cfgDict[ 'allowed_hosts' ].split(',')
     ALLOWED_HOSTS.extend(hosts)
 
+if 'load_dir_root' not in cfgDict:
+    cfgDict[ 'load_dir_root' ] = os.getenv('HOME') # use home dir as default
+
+if not cfgDict[ 'load_dir_root' ].endswith('/'):
+    cfgDict[ 'load_dir_root' ] += '/'
+
 # Application definition
 
 INSTALLED_APPS = [
