@@ -3,135 +3,13 @@
 <head>
     {% load static %}
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/font-awesome.min.css' %}" />
-    <link rel="stylesheet" type="text/css" href="{% static 'css/stylesheet.css' %}" />
-
     <script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
-	<script type="text/javascript" src="{% static 'js/search-bar.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/pageidx.js' %}"></script>
-    <link href="{% static 'bootstrap-3.3.7/css/bootstrap.css' %}" rel="stylesheet">
+
     <script>
 		$(document).ready( function(){
 		    $("#sug-list").hide()
 			loadPage()
-
-            $("#search_query_query").focus(function(){
-                showSuggestion()
-            })
-
-			$("#search_query_query").keyup(function(event){
-				showSuggestion()
-			})
-
-			$("#search_query_query").focus(function(){
-			    showSuggestion()
-			})
-
-			$(document).click(function(e){
-			 e = window.event || e; // 兼容IE7
-			 obj = $(e.srcElement || e.target);
-			    if ($(obj).is("#sug-list,#sug-list *,#search_query_query")) {
-			   } else {
-			   	$("#sug-list").hide()
-			 }
-			});
-
-			$('#search_query_query').bind('keypress',function(event){
-	            if(event.keyCode == "13")
-    	        {
-        	        search($(this).val())
-            	}
-        	})
 		});
-
-function showSuggestionList(keywords) {
-    if(keywords.length == 0) return
-
-    var ul = $("#sug-list")
-    ul.empty()
-    for (var i = keywords.length - 1; i >= 0; i--) {
-        li = document.createElement("li")
-            a = document.createElement("a")
-            a.href = getLocation(keywords[i],0)
-            a.innerHTML = keywords[i]
-            li.append(a)
-        ul.append(li)
-    }
-    $("#sug-list").show()
-}
-
-function showSuggestion() {
-    var keyword = document.getElementById("search_query_query").value
-
-    keyword = processKeyword(keyword)
-
-    if(keyword.length == 0) {
-        var historyKeywords = getCookie("history-keywords")
-        if(historyKeywords.length > 0){
-            keywords = historyKeywords.split("##")
-
-            showSuggestionList(keywords)
-        }
-    }else{
-		$.post("{% url 'keyword_suggest' %}", { 'keyword':keyword, 'csrfmiddlewaretoken': getCookie('csrftoken')},
-			function(data,status){
-			if(status == "success"){
-				var keywords = JSON.parse(data)
-				showSuggestionList(keywords)
-			}
-		})
-    }
-
-}
-
-function search(keyword) {
-
-    if(typeof keyword == "undefined" || keyword==null){
-        keyword = $("#search_query_query").val()
-    }
-
-	keyword = processKeyword(keyword)
-
-    if(keyword.length == 0 || keyword == " ") return false
-
-    //Add it to cookie if it does not exist
-    addHistoryKeyword(keyword)
-
-    $("#search_query_query").blur()
-    $("#sug-list").hide()
-
-	window.location.href = getLocation(keyword, 0)
-}
-
-function processKeyword(keyword){
-	keyword = keyword.toLowerCase()
-    keyword = keyword.replace(/\s+/, ' ')
-    keyword = keyword.replace(/&/,'')
-
-    return keyword
-}
-
-function getLocation(keyword, pageIndex) {
-	return "{% url 'search' %}" + "?&keyword=" + keyword + "&idx=" + pageIndex
-}
-
-function durationStringFromSeconds(seconds) {
-	var duration = ""
-
-	var sec = seconds % 60
-	var min = parseInt(seconds / 60)
-	var hour = 0
-	if (min >= 60) {
-		hour = parseInt(min / 60)
-		min %= 60
-
-		duration += hour
-	 }
-
-	duration = duration + ((hour>0)? ":" : "") +((min<10)? "0" : "") + min + ":" + ((sec<10)? "0" :"") + sec
-
-	return duration
-}
 
 function loadPage() {
 	var keyword = "{{ keyword }}"
@@ -236,54 +114,6 @@ function loadPage() {
 <body>
 
 {% include 'nav.html' %}
-
-<div class="header row container">
-    <div class="header column container">
-        <div class="logo">
-            <a href="{{ site.url }}" title="">
-                <img src="{% static 'images/logo.png' %}" alt="header logo" class="logo">
-            </a>
-        </div>
-        <span class="page-title">视频</span>
-
-        <div class="search container align-right">
-            <div class="form search-bar">
-                <div class="search_form">
-                    <form name="search_query" method="get" action="{% url 'search' %}" target="_self">
-                        <div id="search_query" target="_self">
-                            <div>
-                                <span style="position:relative;" class="add-clear-span">
-                                    <span style="position:relative;" class="add-clear-span">
-                                        <input type="search" id="search_query_query" name="keyword" required="required" placeholder="输入关键词 ..." autocomplete="off" maxlength="200" value="">
-                                        <a href="#clear" style="display: none; color: rgb(204, 204, 204); text-decoration: none; line-height: 1; overflow: hidden; position: absolute; right: 4px; top: 1px;">
-                                            <i class="fa fa-close fa-fw" style="display: inline;"></i>
-                                        </a>
-                                            <ul id="sug-list" style="z-index:10; width:100%;position:absolute;color:000;background-color: #fff;list-style-type: none;padding: 0;padding-left: 5px;margin: 0;border: 1px solid #ccc;border-top: none;display: block;">
-                                            </ul>
-                                    </span>
-                                    <a href="http://somesite/cat/keyword#clear" style="display: none; color: rgb(204, 204, 204); text-decoration: none; line-height: 1; overflow: hidden; position: absolute; right: 4px; top: 1px;">
-                                        <i class="fa fa-close fa-fw" style="display: inline;"></i>
-                                    </a>
-                                </span>
-                            </div>
-                            <div>
-                                <div id="search_query_tag_list">
-                                </div>
-                            </div>
-                        </div>
-                        <button type="submit" value="" class="fa fa-search fa-2x"></button>
-                        <div class="autocomplete"></div>
-                    </form>
-                </div>
-            </div>
-            <div class="filter form tag"></div>
-        </div>
-        <i class="mobile-menu fa fa-bars fa-fw"></i>
-        <i class="mobile-category-list mobile-button-right fa fa-sort-alpha-asc fa-fw"></i>
-    </div>
-
-
-</div>
 
 <ul class="content row container" id="videos">
 </ul>

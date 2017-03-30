@@ -33,7 +33,9 @@
                     }
                     var list = data['files']
 
-                    $("#import_dir").attr("onclick") = "importDir(" + currentDir + ")"
+                    $("#import_dir").click( function(){
+                        importDir(currentDir)
+                        })
 
                     dirName = (currentDir.length > 0) ? currentDir : "/"
                     $("#dirname").text(dirName)
