@@ -58,6 +58,7 @@ This project aims to create a media center site for home use.
 * Django 1.10   
 * Python 2.7  
 * FFmpeg with png/h264 codec
+* openssl
 
 
 ## Default super user
