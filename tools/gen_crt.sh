@@ -2,68 +2,84 @@
 
 help()
 {
-    echo "Example: ./gen_crt.sh aes128 2048 365"
-    echo "Result: pub.crt and pri.key under current directory"
-    echo "Parameters: encrypt_method key_length expire_days"    
+    echo "Example: ./gen_crt.sh root aes128 2048 365 \"/CN=CustomCA\""
+    echo "Example: ./gen_crt.sh sign aes128 2048 365 \"/CN=www.mysite.com\" ca.key ca.cer"
     echo "key_length: 1024|2048|4096"
     methods="aes128|aes192|aes256|camellia128|camellia192|camellia256|des|des3|idea"
     echo "Supported encryption methods:" $methods
     exit 1
 }
 
-gen_crt()
-{
-    method=$1
-    key_length=$2
-    expire_days=$3
-    
-    case $method in
-        aes128|aes192|aes256|camellia128|camellia192|camellia256|des|des3|idea)
-            echo "Using cryption method:" $method
-            ;;
-        *)
-            echo "Wrong parameters"
-            help
-            ;;
-    esac
+operation=$1
+method=$2
+key_length=$3
+expire_days=$4
+subj=$5
+ca_key=$6
+ca_cer=$7
 
-    case $key_length in
-        1024|2048|4096)
-            echo "RSA Key length:" $key_length
-            ;;
-        *)
-            echo "Wrong RSA key length"
-            help
-            ;;
-    esac
+RED="\033[0;31m"
+GREEN="\033[0;32m"
+NC="\033[0m"
 
-    if [$expire_days -lt 0]; then
-        echo "Invalid expire days:" $expire_days
+
+if [ "$operation" = "root" ];then
+    if [ $# -ne 5 ];then
+        echo "${RED}Invalid argument num:$#${NC}"
         help
     fi
-
-    dir_name='gen_crt_tmp'
-    if [-e $dir_name]; then
-        echo "Directory already exists:" $dir_name " Deleting..."
-        rm -rf dir_name
-        echo "Deleted"
+elif [ "$operation" = "sign" ];then
+    if [ $# -ne 7 ];then
+        echo "${RED}Invalid argument num:$#${NC}"
+        help
     fi
-
-    mkdir $dir_name
-    cd $dir_name
-    openssl genrsa -$method -passout pass:x -out ssl.pass.key $key_length
-    openssl rsa -passin pass:x -in ssl.pass.key -out ssl.key
-    openssl req -new -key ssl.key -out ssl.csr
-    openssl x509 -req -days $expire_days -in ssl.csr -signkey ssl.key -out ssl.crt
-    cp ssl.crt ../pub.crt
-    cp ssl.key ../pri.key
-    cd ..
-    rm -rf $dir_name
-}
-
-if [$# -ne 3]; then
-    echo "Argument error!"
+else
+    echo "${RED}Invalid operation $operation${NC}"
     help
 fi
 
-gen_crt $1 $2 $3
+echo "Operation" $operation
+
+case $method in
+    aes128|aes192|aes256|camellia128|camellia192|camellia256|des|des3|idea)
+        echo "Using cryption method:" $method
+        ;;
+    *)
+        echo "Wrong parameters"
+        help
+        ;;
+esac
+
+case $key_length in
+    1024|2048|4096)
+        echo "RSA Key length:" $key_length
+        ;;
+    *)
+        echo "Wrong RSA key length"
+        help
+        ;;
+esac
+
+if [$expire_days -lt 0]; then
+    echo "Invalid expire days:" $expire_days
+    help
+fi
+
+if [ "$operation" = "root" ];then
+    echo "Creating Root CA..."
+    openssl genrsa -$method -out ca.key $key_length
+    openssl req -x509 -new -key ca.key -out ca.cer -days 750 -subj $subj
+    echo "${GREEN}Please distribute ca.cer anywhere needed"
+    echo "${RED}Please keep ca.key in a private place${NC}"
+elif [ "$operation" = "sign" ];then
+    openssl genrsa -$method -out cert.key $key_length
+    openssl req -new -out cert.req -key cert.key -subj $subj
+    openssl x509 -req -in cert.req -out cert.cer -CAkey $ca_key -CA $ca_cer -days $expire_days -CAcreateserial
+    -CAserial serial
+    echo "${GREEN}Please distribute cert.cer freely"
+    echo "${RED}Please keep cert.key privately${NC}"
+else
+    echo "Unknown operation: $operation"
+    help
+fi
+
