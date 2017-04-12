@@ -2,7 +2,8 @@
 
 help()
 {
-    echo "Example: ./gen_crt.sh aes128 2048 365 myssl.crt"
+    echo "Example: ./gen_crt.sh aes128 2048 365"
+    echo "Result: pub.crt and pri.key under current directory"
     echo "Parameters: encrypt_method key_length expire_days"    
     echo "key_length: 1024|2048|4096"
     methods="aes128|aes192|aes256|camellia128|camellia192|camellia256|des|des3|idea"
@@ -15,7 +16,6 @@ gen_crt()
     method=$1
     key_length=$2
     expire_days=$3
-    crt_name=$4
     
     case $method in
         aes128|aes192|aes256|camellia128|camellia192|camellia256|des|des3|idea)
@@ -55,14 +55,15 @@ gen_crt()
     openssl rsa -passin pass:x -in ssl.pass.key -out ssl.key
     openssl req -new -key ssl.key -out ssl.csr
     openssl x509 -req -days $expire_days -in ssl.csr -signkey ssl.key -out ssl.crt
-    cp ssl.crt ../$crt_name
+    cp ssl.crt ../pub.crt
+    cp ssl.key ../pri.key
     cd ..
     rm -rf $dir_name
 }
 
-if [$# -ne 4]; then
+if [$# -ne 3]; then
     echo "Argument error!"
     help
 fi
 
-gen_crt $1 $2 $3 $4
+gen_crt $1 $2 $3
