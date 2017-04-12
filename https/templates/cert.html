@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>Certificates</title>
+</head>
+<body>
+    {% include 'nav.html' %}
+    <br>
+    <div style="max-width:400px;margin-left:auto;margin-right:auto;">
+        <a href="{% static 'cert/ca.cer' %}">下载根证书 Download Root Certificate</a>
+        <p>You can make https safe by importing root certificate</p>
+        <br>
+        <a href="{% static 'cert/cert.cer' %}">下载服务器证书 Download Server Certificate</a>
+    </div>
+</body>
+</html>

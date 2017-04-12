@@ -25,6 +25,7 @@ from video import views as video_views
 from video import player_view
 from live import views as live_views
 from manage_videos import views as video_manage_views
+import https.views as https_views
 
 urlpatterns = [
 		url(r'^$', video_views.videos, name='video-index'),
@@ -42,4 +43,5 @@ urlpatterns = [
 		url(r'^accounts/login/$', auth_views.login),
 		url(r'^manage/$', video_manage_views.index, name='manage'),
 		url(r'^manage/load-dir/$', video_manage_views.load_dir, name='load-dir'),
+		url(r'^cert/', https_views.certificate_download, name='cert'),
 			] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
