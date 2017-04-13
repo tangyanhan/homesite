@@ -38,17 +38,16 @@
         loadRate(-1)
       } )
 
-      $("video #vidStatus").click(function(){
-        var video = $("video")
-        var vidStatus = $("#vidStatus")
+      $("video,#vidStatus").click(function(){
+        var video = $("video")[0]
         if( video.paused ) {
           video.play()
-          vidStatus.setAttribute("class","fui-pause")
-          vidStatus.hide()
+          $("#vidStatus").attr("class","fui-pause")
+          $("#vidStatus").hide()
         }else{
           video.pause()
-          vidStatus.setAttribute("class","fui-play")
-          vidStatus.show()
+          $("#vidStatus").attr("class","fui-play")
+          $("#vidStatus").show()
         }
       })
     });
