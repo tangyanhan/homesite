@@ -190,6 +190,10 @@ def visitDir(baseDir):
 							needConvert = False
 							file = mp4Path
 							ext = 'mp4'
+				elif os.path.getsize(file) == 0:
+					print 'Remove invalid video file:', file
+					os.remove(file)
+					continue
 
 				video_id = nextVideoId()
 
@@ -286,6 +290,8 @@ def convert_video_to_mp4(videoPath,destPath):
 	if os.path.isfile(destPath) and os.path.getsize(destPath) > 0:
 		os.remove(videoPath)
 		return True
+
+	os.remove(destPath)
 
 	return False
 
