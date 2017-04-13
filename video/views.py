@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 from models import Video
 from models import KeywordCount
 from models import KeywordVideoId
@@ -33,9 +34,6 @@ RECENT_CACHE = {
 SEARCH_CACHE = {
 	# keyword : [result list] TODO: add date
 }
-
-def index(request):
-	return render(request, 'video-index.html', {'keyword':''})
 
 # Create your views here.
 def loadRecentRecords():
@@ -70,6 +68,7 @@ def dictForVideo(video):
 
 	return None
 
+@login_required()
 def videos(request):
 	try:
 		print request
@@ -216,3 +215,5 @@ def handler500(request):
                                   context=RequestContext(request))
     response.status_code = 500
     return response
+
+

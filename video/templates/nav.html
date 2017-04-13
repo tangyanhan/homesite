@@ -184,8 +184,8 @@ function durationStringFromSeconds(seconds) {
             </ul>
             </li>
           {% else %}
-            <li><a href="{% url 'admin:login' %}">Log in</a></li>
-            <li><a href="{% url 'admin:logout' %}">Sign up</a></li>
+            <li><a href="{% url 'admin:login' %}?next={{ request.path }}">Log in</a></li>
+            <li><a href="{% url 'admin:logout' %}?next=/">Sign up</a></li>
           {% endif %}
       </ul>
     </div><!-- /.navbar-collapse -->
