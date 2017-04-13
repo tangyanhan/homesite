@@ -23,7 +23,7 @@ RECENT_DAYS = 7
 
 MAX_KEYWORD_LEN = 50
 
-RESULT_NUM_PER_PAGE = 10.0 # Make it float to avoid bad results from ceil when calculating total page num
+RESULT_NUM_PER_PAGE = 40.0 # Make it float to avoid bad results from ceil when calculating total page num
 
 RECENT_CACHE = {
 	'date':'',

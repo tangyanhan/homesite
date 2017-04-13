@@ -104,11 +104,21 @@ function loadPage() {
         #sug-list a:visited{
             color:purple;
         }
+
+        #videos{
+            margin:20px;
+            width:100%;
+        }
+        #pages{
+            margin:30px;
+        }
+
         li.thumb{
             float:left;
             position:relative;
             margin:10px;
             height:auto;
+            list-style-type:none;
         }
 
         .thumb-container{
@@ -131,6 +141,7 @@ function loadPage() {
         span.title{
             text-align:center;
             position:absolute;
+            color:white;
             left:0;
             right:0;
             bottom:0;
@@ -147,7 +158,7 @@ function loadPage() {
 
 {% include 'nav.html' %}
 
-<ul class="content row container" id="videos">
+<ul class="row content" id="videos">
 </ul>
 
 <nav aria-label="Page navigation">
