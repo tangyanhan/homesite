@@ -4,7 +4,8 @@
     {% load static %}
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
-
+    <link rel="stylesheet" type="text/css" href="{% static 'css/video-thumb.css' %}">
+    <script type="text/javascript" src="{% static 'js/video-thumb.js' %}"></script>
     <script>
 		$(document).ready( function(){
 		    $("#sug-list").hide()
@@ -41,44 +42,11 @@ function loadPage() {
 	    }
 	}
 
-	for(var i=0; i<results.length; i++) {
-		video = results[i]
-
-		li = document.createElement("li")
-		li.setAttribute("class", "thumb")
-
-		thumbContainer = document.createElement("div")
-		thumbContainer.setAttribute("class","thumb-container")
-			spanImg = document.createElement("span")
-				spanImg.setAttribute("class", "thumb-image")
-					a = document.createElement("a")
-					a.setAttribute("class","item-link")
-					a.href = "/play/" + video.id
-						img = document.createElement("img")
-						img.src = "{% static 'thumb/' %}" + video.id + ".png"
-						img.setAttribute("data-image-error-source","{% static 'images/no-img.png' %}")
-					a.append(img)
-				spanImg.append(a)
-		thumbContainer.append(spanImg)
-			lenSpan = document.createElement("span")
-			lenSpan.setAttribute("class","length")
-			lenSpan.innerHTML = durationStringFromSeconds(video.duration)
-			thumbContainer.append(lenSpan)
-
-			titleSpan = document.createElement("span")
-			titleSpan.setAttribute("class","title")
-				titleLink = document.createElement("a")
-				titleLink.setAttribute("class","title-item-link")
-				titleLink.href = "/play/" + video.id
-				titleLink.innerHTML = video.title
-
-				titleSpan.append(titleLink)
-			thumbContainer.append(titleSpan)
-
-		li.append(thumbContainer)
-
-		videoDiv.append(li)
-	}
+    for(var i=0; i<results.length; i++) {
+        video = results[i]
+        li = createThumbFromVideo(video)
+        videoDiv.append(li)
+    }
 
 	//recreate page index if necessary
 	updatePageIndex(pageIndex, pageNum, keyword, getLocation)
@@ -102,46 +70,6 @@ function loadPage() {
         }
         #sug-list a:visited{
             color:purple;
-        }
-
-        #videos{
-            padding-left:10px;
-        }
-
-        li.thumb{
-            float:left;
-            position:relative;
-            margin-left:10px;
-            margin-bottom:20px;
-            height:auto;
-            list-style-type:none;
-        }
-
-        .thumb-container{
-            width:180px;
-            height:155px;
-        }
-
-        span.length{
-            position:absolute;
-            top:0;
-            left:0;
-            background:black;
-            opacity:0.7;
-            text-align:left;
-        }
-        span.thumb-image{
-            width:100%;
-            height:135px;
-        }
-        span.title{
-            text-align:center;
-            position:absolute;
-            color:white;
-            left:0;
-            right:0;
-            bottom:0;
-            height:20px;
         }
     </style>
 </head>

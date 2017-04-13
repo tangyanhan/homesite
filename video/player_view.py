@@ -1,25 +1,21 @@
+import sys
+import re
+import traceback
+
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
-from django.shortcuts import render_to_response
-from django.template import RequestContext
-from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+
 from models import Video
-from models import KeywordCount
 from models import KeywordVideoId
 from views import loadRecentRecords
 from views import dictForVideo
-import os
-import sys
-import pdb
-import re
-from django.contrib.auth.decorators import login_required
 
 @login_required
 def play(request,digest):
 	return render(request,'video-player.html', {'video':digest, 'thumb':'thumb/'+ digest +'.png'})
 
-#@csrf_exempt # TODO: should use auth
 def rate(request):
 	try:
 		if not request.user.is_authenticated:
@@ -56,7 +52,6 @@ def rate(request):
 
 
 # Recommend videos in player page. So users can play at their own interest
-@csrf_exempt
 def recommend(request):
 	try:
 		MAX_NUM = 10
@@ -106,8 +101,8 @@ def recommend(request):
 			if len(vidList) < MAX_NUM:
 				recentRecords = loadRecentRecords()
 				for record in recentRecords:
-					if record.id not in checkSet:
-						checkSet.add(record.id)
+					if record['id'] not in checkSet:
+						checkSet.add(record['id'])
 						vidList.append(record)
 		# Trim if necessary
 		if len(vidList) > MAX_NUM:
@@ -115,4 +110,7 @@ def recommend(request):
 
 		return JsonResponse({'videos':vidList})
 	except Exception as e:
-		return HttpResponse('', status=500)
+		exc_type, exc_value, exc_traceback = sys.exc_info()
+		print "*** print_exception:"
+		traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
+		return HttpResponse('',status=500)
