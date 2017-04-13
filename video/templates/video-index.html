@@ -45,8 +45,7 @@ function loadPage() {
 		video = results[i]
 
 		li = document.createElement("li")
-		li.setAttribute("class", "thumb sub")
-		li.id = "thumb-wARksEB5d1w"
+		li.setAttribute("class", "thumb")
 
 		thumbContainer = document.createElement("div")
 		thumbContainer.setAttribute("class","thumb-container")
@@ -106,17 +105,14 @@ function loadPage() {
         }
 
         #videos{
-            margin:20px;
-            width:100%;
-        }
-        #pages{
-            margin:30px;
+            padding-left:10px;
         }
 
         li.thumb{
             float:left;
             position:relative;
-            margin:10px;
+            margin-left:10px;
+            margin-bottom:20px;
             height:auto;
             list-style-type:none;
         }
@@ -158,10 +154,10 @@ function loadPage() {
 
 {% include 'nav.html' %}
 
-<ul class="row content" id="videos">
+<ul class="row mycontainer" id="videos">
 </ul>
 
-<nav aria-label="Page navigation">
+<nav class="mycontainer" aria-label="Page navigation">
   <ul id="pages" class="pagination">
   </ul>
 </nav>

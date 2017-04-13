@@ -131,9 +131,25 @@ function durationStringFromSeconds(seconds) {
 }
 
     </script>
+    <style>
+        @media (max-width:767px){
+            .mycontainer{
+                width:100%;
+            }
+        }
+        @media (min-width:768px){
+            .mycontainer{
+                margin-left:30px;
+                margin-right:30px;
+            }
+        }
+        .mycontainer{
+            margin-top:20px;
+        }
+    </style>
 <!-- navbar -->
   <nav class="navbar nav-default" style="">
-  <div class="container">
+  <div class="mycontainer">
     <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
       <button type="button" class="navbar-toggle collapsed btn btn-default" data-toggle="collapse" data-target="#navbar-collapse">
@@ -141,7 +157,7 @@ function durationStringFromSeconds(seconds) {
         <span class="glyphicon glyphicon-menu-hamburger" style="color:#337ab7;"></span>
       </button>
 
-      <div class="input-group" style="max-width:400px;">
+      <div class="input-group" style="margin-top:15px;max-width:400px;">
         <span class="input-group-addon" id="search_button">
           <span class="glyphicon glyphicon-search"></span>
         </span>
