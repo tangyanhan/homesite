@@ -10,6 +10,10 @@
       cursor:pointer;
     }
 
+    .row{
+        position:relative;
+    }
+
     #vidStatus{
       /* Center */
       position: absolute;
@@ -92,7 +96,7 @@
 
 <div class="container">
 <div class="row">
-    <video controls="controls" preload="auto" width="100%" height="auto">
+    <video controls="controls" preload="auto" width="100%" height="auto" poster="{% static 'cover' %}/{{ video }}.png">
       <source src="{% url 'stream' video %}" type="video/mp4">
     </video>
     <button id="vidStatus"><i class="glyphicon glyphicon-play"></i></button>
