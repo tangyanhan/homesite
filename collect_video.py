@@ -24,8 +24,6 @@ from video.models import KeywordVideoId
 #TODO: we should make it in a public library like 'supported format'
 supported_video_formats = ['mp4','mov','wmv','rmvb','rm','avi']
 
-THUMB_DIR = './static/thumb/'
-
 THUMB_SIZE = '180x135'
 
 gChangeDB = True
@@ -66,11 +64,18 @@ def get_filename_tuple(filePath):
 
 
 def get_thumb_path(fileName):
-	global THUMB_DIR
+	THUMB_DIR = './static/thumb'
 	if not os.path.isdir(THUMB_DIR):
 		os.mkdir(THUMB_DIR)
 
 	return './static/thumb/' + str(fileName) + '.png'
+
+def get_cover_path(fileName):
+	COVER_DIR = './static/cover'
+	if not os.path.isdir(COVER_DIR):
+		os.mkdir(COVER_DIR)
+
+	return './static/cover/' + str(fileName) + '.png'
 
 # TODO: we should use an advanced method to analyze them
 # @return: a list of keywords concaternated together
@@ -208,6 +213,8 @@ def visitDir(baseDir):
 
 				thumbPath = get_thumb_path(video_id)
 
+				cover_path = get_cover_path(video_id)
+				output = gen_cover(file, cover_path)
 				output = gen_thumb(file,thumbPath)
 
 				if output is None:
@@ -267,10 +274,20 @@ def gen_thumb(videoPath, thumbPath):
 		os.remove(thumbPath)
 
 	global THUMB_SIZE
-	cmd = ['ffmpeg', '-itsoffset', '-1', '-i', videoPath, '-vframes', '1', '-f', 'apng', '-s', THUMB_SIZE, thumbPath]
+	cmd = ['ffmpeg', '-itsoffset', '-5', '-i', videoPath, '-vframes', '1', '-f', 'apng', '-s', THUMB_SIZE, thumbPath]
 	p = Popen(cmd, stdout=PIPE, stderr=PIPE)
 
 	output = p.communicate(input="y\n")[1] # TODO: need a solution to answer questions
+
+	return output
+
+def gen_cover(video_path, cover_path):
+	if os.path.isfile(cover_path):
+		os.remove(cover_path)
+
+	cmd = ['ffmpeg', '-itsoffset', '-1', '-i', video_path, '-vframes', '1', '-f', 'apng', cover_path]
+	p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+	output = p.communicate()
 
 	return output
 
