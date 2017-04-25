@@ -3,6 +3,7 @@
     <script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/search-bar.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/pageidx.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bootstrap-3.3.7/js/bootstrap.js' %}"></script>
     <link href="{% static 'bootstrap-3.3.7/css/bootstrap.css' %}" rel="stylesheet">
     <script>
 		$(document).ready( function(){
@@ -175,8 +176,8 @@ function durationStringFromSeconds(seconds) {
           <li><a href="{% url 'live-index' %}">Live</a></li>
           {% if request.user.is_authenticated %}
           <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ request.user.username }} <span class="caret"></span></a>
-            <ul class="dropdown-menu">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-labelledby="user-menu" role="button" aria-haspopup="true" aria-expanded="false">{{ request.user.username }} <span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu" id="user-menu">
                 <li><a href="#">Info</a></li>
                 <li><a href="#">Settings</a></li>
                 <li role="separator" class="divider"></li>
