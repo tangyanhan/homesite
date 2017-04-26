@@ -27,6 +27,7 @@ from live import views as live_views
 from manage_videos import views as video_manage_views
 import https.views as https_views
 from weather import views as weather_views
+from tools import glyph_views
 
 urlpatterns = [
 		url(r'^$', video_views.videos, name='video-index'),
@@ -45,5 +46,7 @@ urlpatterns = [
 		url(r'^manage/$', video_manage_views.index, name='manage'),
 		url(r'^manage/load-dir/$', video_manage_views.load_dir, name='load-dir'),
 		url(r'^cert/', https_views.certificate_download, name='cert'),
+		url(r'^glyph/(\d+)/$', glyph_views.page, name='glyph-page'),
+		url(r'^glyph/$', glyph_views.index, name='glyph'),
         url(r'^weather', weather_views.weather, name='weather'),
 			] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
