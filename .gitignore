@@ -1,4 +1,5 @@
 # static files
+.idea/
 static/thumb/*.png
 # Byte-compiled / optimized / DLL files
 

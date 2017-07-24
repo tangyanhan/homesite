@@ -29,8 +29,8 @@ server {
 	listen 443 ssl default_server;
 	listen [::]:443 ssl default_server;
 	
-	ssl_certificate /home/ethan/workspace/homesite/tools/cert/cert.cer;
-	ssl_certificate_key /home/ethan/workspace/homesite/tools/cert/cert.key;
+	ssl_certificate /home/ethan/workspace/homesite/deploy/cert/cert.cer;
+	ssl_certificate_key /home/ethan/workspace/homesite/deploy/cert/cert.key;
 
 	#
 	# Note: You should disable gzip for SSL traffic.

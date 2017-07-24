@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 
 import os
 
+from util.log import log
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -25,33 +27,32 @@ SECRET_KEY = 'qexc#87w^2ikk3586p)%7nm+q-5zmt1f24bben)%u-2221b+x+'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-cfgDict = {}
+config_dict = {}
 try:
-    with open('site.conf','r') as cfgFile:
+    with open('site.conf', 'r') as cfgFile:
         for line in cfgFile:
             line = line.strip('\n')
-            if len(line) > 2 :
+            if len(line) > 2:
                 parts = line.split('=')
-                cfgDict[ parts[0] ] = parts[1]
+                config_dict[parts[0]] = parts[1]
 except IOError:
-    print 'Expected configuration file does not exist'
+    log.error('Expected configuration file does not exist')
 
 ALLOWED_HOSTS = []
 
-if cfgDict[ 'allowed_hosts' ] is not None:
-    hosts = cfgDict[ 'allowed_hosts' ].split(',')
+if config_dict['allowed_hosts'] is not None:
+    hosts = config_dict['allowed_hosts'].split(',')
     ALLOWED_HOSTS.extend(hosts)
 
-if 'load_dir_root' not in cfgDict:
-    cfgDict[ 'load_dir_root' ] = os.getenv('HOME') # use home dir as default
+if 'load_dir_root' not in config_dict:
+    config_dict['load_dir_root'] = os.getenv('HOME')  # use home dir as default
 
-if not cfgDict[ 'load_dir_root' ].endswith('/'):
-    cfgDict[ 'load_dir_root' ] += '/'
+if not config_dict['load_dir_root'].endswith('/'):
+    config_dict['load_dir_root'] += '/'
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django_pdb',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -60,9 +61,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
-if cfgDict[ 'installed_apps' ] is not None:
-    apps = cfgDict[ 'installed_apps' ].split(',')
-    print '#Installed apps:',apps
+if 'installed_apps' in config_dict:
+    apps = config_dict['installed_apps'].split(',')
+    log.info('Installed apps: {0}'.format(apps))
     INSTALLED_APPS.extend(apps)
 
 MIDDLEWARE = [
@@ -144,7 +145,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = '' #BASE_DIR + '/static/'
+STATIC_ROOT = ''  # BASE_DIR + '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
