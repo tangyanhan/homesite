@@ -27,7 +27,12 @@ class KeywordDictDataObj(object):
         self.files = set()
 
 
-def get_filename_tuple(file_path):
+def extract_filename_tuple(file_path):
+    """
+    Extract path components from file_path
+    :param file_path: absolute path of given file
+    :return: (success, (dir, file_name, ext))
+    """
     global FILE_NAME_REG
     if FILE_NAME_REG is None:
         formats = ''
@@ -45,9 +50,10 @@ def get_filename_tuple(file_path):
     match = FILE_NAME_REG.match(file_path)
 
     if match is not None:
+        print '#Groups:', match.groups()
         return True, match.groups()
 
-    return False, None, None, None
+    return False, None
 
 
 def get_thumb_path(fn):
@@ -153,11 +159,12 @@ def visit_dir(base_dir):
                 if os.path.isdir(file_path):
                     continue
 
-                success, file_dir, file_name, ext = get_filename_tuple(file_path)
+                success, path_components = extract_filename_tuple(file_path)
 
                 if not success:
                     continue
 
+                file_dir, file_name, ext = path_components
                 # skip hidden files (possibly not valid video files)
                 if file_name.startswith('.'):
                     continue
@@ -176,7 +183,7 @@ def visit_dir(base_dir):
                             need_convert = False
                             file = mp4_path
                             ext = 'mp4'
-                elif os.path.getsize(file) == 0:
+                elif os.path.getsize(file_path) == 0:
                     log.info('Remove invalid video file: {0}'.format(file))
                     os.remove(file)
                     continue
@@ -193,22 +200,16 @@ def visit_dir(base_dir):
                     video.need_convert = need_convert
 
                 thumb_path = get_thumb_path(video_id)
-
                 cover_path = get_cover_path(video_id)
-                output = gen_cover(file, cover_path)
-                output = gen_thumb(file, thumb_path)
-
-                if output is None:
+                if not gen_cover(file_path, cover_path):
+                    log.error("Failed to gen cover for {0}".format(file_path))
                     continue
 
-                duration = search_duration_from_text(output)
-                del output
+                success, duration = gen_thumb(file_path, thumb_path)
+                if not success:
+                    log.error("Failed to gen thumb for {1}".format(file_path))
 
-                if not duration:
-                    log.error('#Failed to get duration from {0}'.format(file))
-                    duration = 0
-
-                keywords = get_keywords(base_dir, file)
+                keywords = get_keywords(base_dir, file_path)
 
                 log.info('#Keywords:'.format(keywords))
                 for key in keywords:
@@ -225,10 +226,10 @@ def visit_dir(base_dir):
                         dict[key] = data
 
                     if video_id not in data.files:
-                        data.count = data.count + 1
+                        data.count += 1
                         data.files.add(video_id)
                 video.title = file_name
-                video.path = file
+                video.path = file_path
                 video.duration = duration
                 if g_change_db:
                     video.save()
@@ -242,18 +243,26 @@ def visit_dir(base_dir):
     save_dict_to_db(dict)
 
 
-# Generate thumbnail of given video. Delete thumb_path if thumb_path already exists
-# @return: command output of ffmpeg
 def gen_thumb(video_path, thumb_path):
+    """
+    Generate thumb image for the given video, and grabs duration from output
+    :return: (success, duration)
+    """
     if os.path.isfile(thumb_path):
         os.remove(thumb_path)
 
     global THUMB_SIZE
     cmd = ['ffmpeg', '-itsoffset', '-5', '-i', video_path, '-vframes', '1', '-f', 'apng', '-s', THUMB_SIZE, thumb_path]
-    p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-    output = p.communicate(input="y\n")[1]  # TODO: need a solution to answer questions
+    p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    p.stdin.write('y\n')
+    output = p.communicate()[1]
 
-    return output
+    duration = search_duration_from_text(output)
+    if not duration:
+        log.error("Failed to find duration for {0}".format(video_path))
+        duration = 0
+
+    return p.returncode == 0, duration
 
 
 def gen_cover(video_path, cover_path):
@@ -261,10 +270,11 @@ def gen_cover(video_path, cover_path):
         os.remove(cover_path)
 
     cmd = ['ffmpeg', '-itsoffset', '-1', '-i', video_path, '-vframes', '1', '-f', 'apng', cover_path]
-    p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-    output = p.communicate()
+    p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    p.stdin.write('y\n')
+    p.communicate()
 
-    return output
+    return p.returncode == 0
 
 
 # Convert video to mp4
@@ -275,16 +285,11 @@ def convert_video_to_mp4(video_path, dest_path):
     log.info('#Converting: {0} => {1}\n', video_path, dest_path)
 
     cmd = ['ffmpeg', '-i', video_path, '-vcodec', 'h264', '-acodec', 'aac', dest_path]
-    p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+    p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    p.stdin.write('y\n')
     p.communicate()
 
-    # Remove old if succeeded
-    if os.path.isfile(dest_path) and os.path.getsize(dest_path) > 0:
-        os.remove(video_path)
-        return True
-    os.remove(dest_path)
-
-    return False
+    return p.returncode == 0
 
 
 # Search the duration from given text
