@@ -15,6 +15,9 @@ KEYWORDS_BLACKLIST = []
 THUMB_DIR = './static/thumb'
 THUMB_SIZE = '180x135'
 COVER_DIR = './static/cover'
+FLIP_DIR = './static/flip'
+
+FLIP_NUM = 16
 
 g_change_db = True
 
@@ -208,7 +211,10 @@ def visit_dir(base_dir):
                     continue
 
                 success, duration = gen_thumb(file_path, thumb_path)
-                if not success:
+                if success:
+                    if not gen_flips(file_path, video.video_id, duration, FLIP_DIR, FLIP_NUM):
+                        log.error("Failed to gen flips for {0}".format(file_path))
+                else:
                     log.error("Failed to gen thumb for {0}".format(file_path))
 
                 keywords = get_keywords(base_dir, file_path)
@@ -265,6 +271,36 @@ def gen_thumb(video_path, thumb_path):
         duration = 0
 
     return p.returncode == 0, duration
+
+
+def gen_flips(video_path, video_id, duration, flip_path, flip_num):
+    """
+    Generate flips for the given video
+    :param video_path: path of the video
+    :param video_id: id of the file
+    :param duration: duration of video in seconds
+    :param flip_path: path dir to put the flips
+    :param flip_num: number of flips to generate
+    :return: True on success, False otherwise
+    """
+    if not os.path.isdir(flip_path):
+        os.mkdir(flip_path)
+
+    duration = float(duration)
+    flip_num = float(flip_num)
+    interval = duration / flip_num
+    if interval <= 0.0:
+        log.error("Cannot generate flips. Duration: {0} FlipNum:{1}".format(duration, flip_num))
+        return False
+    fps = 'fps=1/' + str(interval)
+    global THUMB_SIZE
+    flip_path = os.path.join(flip_path, str(video_id)) + '-%d.png'
+    cmd = ['ffmpeg', '-i', video_path, '-vf', fps, '-s', THUMB_SIZE, flip_path]
+    p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    p.stdin.write('y\n')
+    p.communicate()
+
+    return p.returncode == 0
 
 
 def gen_cover(video_path, cover_path):
