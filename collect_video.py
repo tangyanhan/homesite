@@ -188,26 +188,23 @@ def visit_dir(base_dir):
                     os.remove(file)
                     continue
 
-                video_id = next_video_id()
-
-                videos = Video.objects.filter(video_id=video_id)
-
+                videos = Video.objects.filter(path=file_path)
                 if videos:
-                    video = videos[0]
-                else:
-                    video = Video()
-                    video.video_id = video_id
-                    video.need_convert = need_convert
+                    log.info("Existing video: {0}".format(file_path))
+                    continue
+                video = Video()
+                video.video_id = next_video_id()
+                video.need_convert = need_convert
 
-                thumb_path = get_thumb_path(video_id)
-                cover_path = get_cover_path(video_id)
+                thumb_path = get_thumb_path(video.video_id)
+                cover_path = get_cover_path(video.video_id)
                 if not gen_cover(file_path, cover_path):
                     log.error("Failed to gen cover for {0}".format(file_path))
                     continue
 
                 success, duration = gen_thumb(file_path, thumb_path)
                 if not success:
-                    log.error("Failed to gen thumb for {1}".format(file_path))
+                    log.error("Failed to gen thumb for {0}".format(file_path))
 
                 keywords = get_keywords(base_dir, file_path)
 
@@ -216,7 +213,7 @@ def visit_dir(base_dir):
                     if len(key) == 0:
                         continue
                     else:
-                        log.info('#Added keyword:'.format(key))
+                        log.info('#Added keyword:{0}'.format(key))
 
                     data = None
                     if key in dict:
@@ -225,9 +222,9 @@ def visit_dir(base_dir):
                         data = KeywordDictDataObj()
                         dict[key] = data
 
-                    if video_id not in data.files:
+                    if video.video_id not in data.files:
                         data.count += 1
-                        data.files.add(video_id)
+                        data.files.add(video.video_id)
                 video.title = file_name
                 video.path = file_path
                 video.duration = duration
