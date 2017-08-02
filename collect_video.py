@@ -10,6 +10,8 @@ import traceback
 # TODO: we should make it in a public library like 'supported format'
 supported_video_formats = ['mp4', 'mov', 'wmv', 'rmvb', 'rm', 'avi']
 
+KEYWORDS_BLACKLIST = []
+
 THUMB_DIR = './static/thumb'
 THUMB_SIZE = '180x135'
 COVER_DIR = './static/cover'
@@ -69,10 +71,14 @@ def get_cover_path(fn):
     return './static/cover/' + str(fn) + '.png'
 
 
-# TODO: we should use an advanced method to analyze them
-# @return: a list of keywords concaternated together
-def get_keywords(base_dir, file_path):
-    file_path = str(file_path).replace(base_dir, '')  # remove base_dir from file_path
+def get_keywords(prefix, file_path):
+    """
+    Get keywords from file path
+    :param prefix: Prefix of the dir path, so we can ignore them
+    :param file_path: full path of the video file
+    :return: a list of keywords
+    """
+    file_path = str(file_path).replace(prefix, '')  # remove base_dir from file_path
     file_path = os.path.splitext(file_path)[0]  # Only keep the part without extension
     file_path = str(file_path).lower()
     file_path = re.sub(r'[/.#]', ' ', file_path)  # Replace meaningless symbols to space
@@ -209,7 +215,7 @@ def visit_dir(base_dir):
 
                 log.info('#Keywords:'.format(keywords))
                 for key in keywords:
-                    if len(key) == 0:
+                    if len(key) == 0 or key in KEYWORDS_BLACKLIST:
                         continue
                     else:
                         log.info('#Added keyword:{0}'.format(key))
@@ -327,6 +333,17 @@ if __name__ == '__main__':
     if len(sys.argv) > 2:
         if sys.argv[2] == 'nosave':
             g_change_db = False
+    keyword_file = 'keywords.blacklist'
+    try:
+        with open(keyword_file, 'r') as kfp:
+            for line in kfp:
+                line = line.strip('\n')
+                if line:
+                    KEYWORDS_BLACKLIST.append(line)
+        log.info("Keywords blacklist: {0}".format(KEYWORDS_BLACKLIST))
+    except Exception as e:
+        log.error("Error while processing {0}:{1}".format(keyword_file, e))
+
     log.info('###### Begin searching videos in {0}'.format(search_dir))
 
     visit_dir(search_dir)
