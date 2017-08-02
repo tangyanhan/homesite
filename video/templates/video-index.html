@@ -34,12 +34,16 @@ function loadPage() {
 	var videoDiv = $("#videos")
 	videoDiv.empty() //remove old results
 
+    var emptyHint = document.getElementById("empty-hint")
 	if( results.length == 0 ) {
+	    emptyHint.visible = true
 	    if(keyword.length == 0) {
-	        videoDiv.innerHTML = "目前没有收录任何视频"
+	        emptyHint.innerHTML = "目前没有收录任何视频"
 	    }else{
-	        videoDiv.innerHTML = "没有找到 <b>" + keyword + "</b> 的相关搜索结果"
+	        emptyHint.innerHTML = "没有找到 <b>" + keyword + "</b> 的相关搜索结果"
 	    }
+	}else{
+	    emptyHint.visible = false;
 	}
 
     for(var i=0; i<results.length; i++) {
@@ -82,6 +86,8 @@ function loadPage() {
 
 {% include 'nav.html' %}
 
+<div class="container" style="background:FFE">
+   <h2 id="empty-hint"></h2>
 <ul class="row mycontainer" id="videos">
 </ul>
 
@@ -89,6 +95,8 @@ function loadPage() {
   <ul id="pages" class="pagination">
   </ul>
 </nav>
+
+</div>
 
 
 </body>
