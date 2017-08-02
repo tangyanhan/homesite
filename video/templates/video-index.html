@@ -16,7 +16,7 @@ function loadPage() {
 	var keyword = "{{ keyword }}"
 	var pageIndex = {{ idx }}
 	var pageNum = {{ pageNum }}
-	var results = {{ results|safe }}
+	results = {{ results|safe }};
 
 	$("#search_query_query").value = keyword
 
