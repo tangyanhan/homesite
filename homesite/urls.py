@@ -35,7 +35,7 @@ urlpatterns = [
                   url(r'^recommend/', player_view.recommend, name='recommend-videos'),
                   url(r'^stream/([a-f0-9]+)$', video_stream.stream, name='stream'),
                   url(r'^search.*$', video_views.videos, name='search'),
-                  url(r'^suggest/', video_views.keyword_suggest, name='keyword_suggest'),
+                  url(r'^suggest/$', video_views.keyword_suggest, name='keyword_suggest'),
                   url(r'^live-post/(\d+)$', live_views.post, name='live-post'),
                   url(r'^live/(\d+)$', live_views.live, name='live'),
                   url(r'^live/$', live_views.index, name='live-index'),
@@ -45,3 +45,6 @@ urlpatterns = [
                   url(r'^manage/load-dir/$', video_manage_views.load_dir, name='load-dir'),
                   url(r'^cert/', https_views.certificate_download, name='cert'),
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+handler404 = 'video.views.handler404'
+handler500 = 'video.views.handler500'

@@ -8,8 +8,8 @@ import traceback
 
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.http import JsonResponse
 from django.shortcuts import render_to_response
-from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from models import Video
@@ -178,37 +178,31 @@ def load_search_result_with_keyword(keys):
 # Suggest keyword to client. This view don't need csrf
 @csrf_exempt
 def keyword_suggest(request):
+    print '#Request type:', type(request)
     try:
         keyword = request.POST['keyword']
-
         if len(keyword) > KEYWORD_MAX_LENGTH:
-            return HttpResponse('')
+            return HttpResponse('', status=400)
 
         # results ordered by count field in descending order
         available_keywords = KeywordCount.objects.filter(keyword__icontains=keyword).order_by('-count')
 
-        if len(available_keywords) > 0:
+        if available_keywords:
             sug_list = []
             for record in available_keywords:
                 sug_list.append(record.keyword)
-            return json.dumps(sug_list)
+            return JsonResponse({'keywords': sug_list})
 
         return HttpResponse('', status=404)
     except:
         exc_type, exc_value, exc_traceback = sys.exc_info()
-        traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
+        traceback.print_exception(exc_type, exc_value, exc_traceback, limit=5, file=sys.stdout)
         return HttpResponse('', status=500)
 
 
-def handler404(request):
-    response = render_to_response('404.html', {},
-                                  context=RequestContext(request))
-    response.status_code = 404
-    return response
+def handler404(request, template_name='404.html'):
+    return render_to_response(template_name)
 
 
-def handler500(request):
-    response = render_to_response('500.html', {},
-                                  context=RequestContext(request))
-    response.status_code = 500
-    return response
+def handler500(request, template_name='500.html'):
+    return render_to_response(template_name)

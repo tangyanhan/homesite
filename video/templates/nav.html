@@ -74,7 +74,7 @@ function showSuggestion() {
 		$.post("{% url 'keyword_suggest' %}", { 'keyword':keyword, 'csrfmiddlewaretoken': getCookie('csrftoken')},
 			function(data,status){
 			if(status == "success"){
-				var keywords = JSON.parse(data)
+				var keywords = data['keywords']
 				showSuggestionList(keywords)
 			}
 		})
@@ -146,7 +146,11 @@ function durationStringFromSeconds(seconds) {
             }
         }
         .mycontainer{
-            margin-top:20px;
+            margin-top:0;
+        }
+
+        #sug-list{
+        	z-index:5; width:100%;position:absolute;color:000;top:36px;background-color: #fff;list-style-type: none;padding: 0;padding-left: 5px;margin: 0;border: 1px solid #ccc;border-top: none;display: block;
         }
 
 	</style>
@@ -167,7 +171,7 @@ function durationStringFromSeconds(seconds) {
         </span>
 					<input id="keyword_input" class="form-control" type="search" placeholder="Search Keywords">
 					<ul id="sug-list"
-						style="z-index:5; width:100%;position:absolute;color:000;top:36px;background-color: #fff;list-style-type: none;padding: 0;padding-left: 5px;margin: 0;border: 1px solid #ccc;border-top: none;display: block;">
+						style="">
 					</ul>
 				</div>
 			</div>
