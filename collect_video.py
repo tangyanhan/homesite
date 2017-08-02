@@ -50,7 +50,6 @@ def extract_filename_tuple(file_path):
     match = FILE_NAME_REG.match(file_path)
 
     if match is not None:
-        print '#Groups:', match.groups()
         return True, match.groups()
 
     return False, None
@@ -328,6 +327,6 @@ if __name__ == '__main__':
     if len(sys.argv) > 2:
         if sys.argv[2] == 'nosave':
             g_change_db = False
-    log.info('###### Begin searching videos in ', search_dir)
+    log.info('###### Begin searching videos in {0}'.format(search_dir))
 
     visit_dir(search_dir)
