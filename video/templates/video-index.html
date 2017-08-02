@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en-US">
 <head>
-    {% load static %}
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/video-thumb.css' %}">
-    <script type="text/javascript" src="{% static 'js/video-thumb.js' %}"></script>
-    <script>
+	{% load static %}
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+	<link rel="stylesheet" type="text/css" href="{% static 'css/video-thumb.css' %}">
+	<script type="text/javascript" src="{% static 'js/video-thumb.js' %}"></script>
+	<script>
 		$(document).ready( function(){
 		    $("#sug-list").hide()
 			loadPage()
@@ -64,8 +64,9 @@ function loadPage() {
 	    }
 	}
 }
-    </script>
-    <style>
+
+	</script>
+	<style>
         #sug-list a{
             font-size: 80%;
         }
@@ -75,7 +76,8 @@ function loadPage() {
         #sug-list a:visited{
             color:purple;
         }
-    </style>
+
+	</style>
 </head>
 
 <header>
@@ -87,14 +89,14 @@ function loadPage() {
 {% include 'nav.html' %}
 
 <div class="container" style="background:FFE">
-   <h2 id="empty-hint"></h2>
-<ul class="row mycontainer" id="videos">
-</ul>
+	<h2 id="empty-hint"></h2>
+	<ul class="row mycontainer" id="videos">
+	</ul>
 
-<nav class="mycontainer" aria-label="Page navigation">
-  <ul id="pages" class="pagination">
-  </ul>
-</nav>
+	<nav class="mycontainer" aria-label="Page navigation">
+		<ul id="pages" class="pagination">
+		</ul>
+	</nav>
 
 </div>
 
