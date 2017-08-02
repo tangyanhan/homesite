@@ -1,49 +1,34 @@
 <head>
-  {% load static %}
-  <script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+	{% load static %}
+	<script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
 
-  <link href="{% static 'bootstrap-3.3.7/css/bootstrap.css' %}" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/video-thumb.css' %}">
-    <script type="text/javascript" src="{% static 'js/video-thumb.js' %}"></script>
-  <style>
-    .fa.fa-thumbs-up, fa.fa-thumbs-down{
-      cursor:pointer;
+	<link href="{% static 'bootstrap-3.3.7/css/bootstrap.css' %}" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="{% static 'css/video-thumb.css' %}">
+	<script type="text/javascript" src="{% static 'js/video-thumb.js' %}"></script>
+	<link href="http://vjs.zencdn.net/6.2.4/video-js.css" rel="stylesheet">
+
+	<!-- If you'd like to support IE8 -->
+	<script src="http://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script>
+	<style>
+
+    video{
+        background-color: #424242;
+    }
+    #videos{
+        padding:0;
     }
 
-    .row{
-        position:relative;
-    }
-
-    #vidStatus{
-      /* Center */
-      position: absolute;
-      margin: auto;
-      top: 0; left: 0; bottom: 0; right: 0;
-      width:100px;
-      height:60px;
-      color:white;
-      background:black;
-      opacity:0.7;
-      border-radius:6px;
-      border-width:0;
-      z-index:5;
-    }
-
-    li{
-      list-style-type:none;
-    }
-
-  </style>
-  <script>
+	</style>
+	<script>
     $(document).ready( function(){
       loadRate(0)
       loadRecommendVideos()
 
-      $("i.glyphicon.glyphicon-thumbs-up").click( function(){
+      $("button.glyphicon.glyphicon-thumbs-up").click( function(){
         loadRate(1)
       } )
 
-      $("i.glyphicon.glyphicon-thumbs-down").click( function(){
+      $("button.glyphicon.glyphicon-thumbs-down").click( function(){
         loadRate(-1)
       } )
 
@@ -68,8 +53,8 @@
 				likeCount = data["like"]
 				dislikeCount = data["dislike"]
 
-				$("i.glyphicon.glyphicon-thumbs-up").text(likeCount)
-				$("i.glyphicon.glyphicon-thumbs-down").text(dislikeCount)
+				$("button.glyphicon.glyphicon-thumbs-up").text(likeCount)
+				$("button.glyphicon.glyphicon-thumbs-down").text(dislikeCount)
 			}
 		})
     }
@@ -87,30 +72,35 @@
           }
       })
     }
-  </script>
+
+	</script>
 </head>
 
 <body>
 
 {% include 'nav.html' %}
 
-<div class="container">
-<div class="row">
-    <video controls="controls" preload="auto" width="100%" height="auto" poster="{% static 'cover' %}/{{ video }}.png">
-      <source src="{% url 'stream' video %}" type="video/mp4">
-    </video>
-    <button id="vidStatus"><i class="glyphicon glyphicon-play"></i></button>
-    <div class="row">
-      <i class="glyphicon glyphicon-thumbs-up"></i>
-      <i>   </i>
-      <i class="glyphicon glyphicon-thumbs-down"></i>
-  </div>
+<div class="container body-container">
+	<video class="video-js vjs-default-skin vjs-16-9" controls="controls" preload="auto"
+		   poster="{% static 'cover' %}/{{ video }}.png" data-setup="{}">
+		<source src="{% url 'stream' video %}" type="video/mp4">
+		<p class="vjs-no-js">
+			To view this video please enable JavaScript, and consider upgrading to a web browser that
+			<a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+		</p>
+	</video>
+
+	<script src="http://vjs.zencdn.net/6.2.4/video.js"></script>
+
+	<div>
+		<button type="button" class="btn btn-default glyphicon glyphicon-thumbs-up"></button>
+		<button class="btn btn-default glyphicon glyphicon-thumbs-down"></button>
+	</div>
+	<br>
+	<ul id="videos">
+	</ul>
 </div>
-</div>
-    <div class="mycontainer">
-      <ul id="videos">
-      </ul>
-    </div>
-  <script type="text/javascript" src="{% static 'bootstrap-3.3.7/js/bootstrap.js' %}"></script>
-  <script type="text/javascript" src="{% static 'js/search-bar.js' %}"></script>
+
+<script type="text/javascript" src="{% static 'bootstrap-3.3.7/js/bootstrap.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/search-bar.js' %}"></script>
 </body>

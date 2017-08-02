@@ -135,28 +135,56 @@ function durationStringFromSeconds(seconds) {
 	</script>
 	<style>
         @media (max-width:767px){
-            .mycontainer{
+            .container{
                 width:100%;
             }
         }
         @media (min-width:768px){
-            .mycontainer{
+            .container{
                 margin-left:30px;
                 margin-right:30px;
             }
         }
-        .mycontainer{
+        .container{
             margin-top:0;
+        }
+        .body-container{
+        	background-color: #F1F1F1;
+        }
+
+        .navbar{
+        	background-color: #FFF;
+        }
+
+        a{
+        	color: #000;
+        }
+
+        li>a:hover, li>a:focus {
+        	color: #DF4135;
+        }
+
+        body{
+        	background-color: #F1F1F1;
+        }
+
+        .btn-primary, .btn-primary:focus, .btn-primary:hover{
+        	color: #FFF;
+        	background-color: #DF4738 !important;
         }
 
         #sug-list{
         	z-index:5; width:100%;position:absolute;color:000;top:36px;background-color: #fff;list-style-type: none;padding: 0;padding-left: 5px;margin: 0;border: 1px solid #ccc;border-top: none;display: block;
         }
 
+        li{
+      		list-style-type:none;
+    	}
+
 	</style>
 	<!-- navbar -->
-	<nav class="navbar nav-default" style="">
-		<div class="mycontainer">
+	<nav class="navbar nav-default">
+		<div class="container">
 			<!-- Brand and toggle get grouped for better mobile display -->
 			<div class="navbar-header">
 				<button type="button" class="navbar-toggle collapsed btn btn-default" data-toggle="collapse"

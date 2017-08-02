@@ -27,7 +27,7 @@ def rate(request):
 
         video_id = request.POST['id']
         option = int(request.POST['op'])
-        if option not in [1, -1]:
+        if option not in [1, 0, -1]:
             return HttpResponse('', status=400)
         results = Video.objects.filter(video_id=video_id)
 

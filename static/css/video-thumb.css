@@ -5,7 +5,8 @@
 li.thumb{
     float:left;
     position:relative;
-    margin-left:10px;
+    margin-left:0;
+    margin-right: 10px;
     margin-bottom:20px;
     height:auto;
     list-style-type:none;
