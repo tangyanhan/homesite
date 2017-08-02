@@ -1,6 +1,8 @@
 # static files
 .idea/
 static/thumb/*.png
+static/cover/*.png
+static/flip/*.png
 # Byte-compiled / optimized / DLL files
 
 __pycache__/
