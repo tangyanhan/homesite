@@ -12,7 +12,9 @@ function createThumbFromVideo(video){
                 a.href = "/play/" + video.id
                     img = document.createElement("img")
                     img.src = "/static/thumb/" + video.id + ".png"
-                    img.setAttribute("data-image-error-source","{% static 'images/no-img.png' %}")
+                    img.setAttribute("data-image-error-source","/static/images/no-img.png")
+                    img.setAttribute("flip-template", "/static/flip/" + video.id + "-{index}.png")
+                    img.className += " flip"
                 a.append(img)
             spanImg.append(a)
     thumbContainer.append(spanImg)

@@ -6,8 +6,49 @@
 	<script type="text/javascript" src="{% static 'bootstrap-3.3.7/js/bootstrap.js' %}"></script>
 	<link href="{% static 'bootstrap-3.3.7/css/bootstrap.css' %}" rel="stylesheet">
 	<script>
+		var timer
+		var originalSrc
+		function getAttr(element, attr, defValue) {
+			var value = element.attr(attr)
+			if( !value ) {
+				return defValue
+			}
+			return value
+		}
+
+		function startFlip(element, template, interval, next, start, end) {
+			if(next > end) {
+				next = start
+			}
+			var imgSrc = template.replace(/{index}/, next + "")
+			element.attr("src", imgSrc)
+			timer = setTimeout(startFlip.bind(null, element, template, interval, next+1, start, end), interval)
+		}
+
+		function stopFlip(element, imgSrc) {
+			clearTimeout(timer)
+			element.attr("src", imgSrc)
+		}
+
 		$(document).ready( function(){
 		    $("#sug-list").hide()
+
+		    $("img.flip").mouseover(function(){
+		    	var flipTemplate = $(this).attr("flip-template");
+		    	if( flipTemplate ) {
+		    		console.log(flipTemplate);
+		    	}
+		    	var flipInterval = getAttr($(this), "flip-interval", 800)
+		    	var flipStart = getAttr($(this), "flip-start", 1)
+		    	var flipEnd = getAttr($(this), "flip-end", 16)
+		    	originalSrc = $(this).attr("src")
+		    	timer = setTimeout(startFlip.bind(null, $(this), flipTemplate, flipInterval, flipStart, flipStart, flipEnd), 1000)
+		    });
+
+		    $("img.flip").mouseleave(function(){
+				console.log("Left img")
+				stopFlip($(this), originalSrc)
+		    });
 
 			$("#search_button").click(function(){
 			  search( $("#keyword_input").val() )
@@ -132,6 +173,7 @@ function durationStringFromSeconds(seconds) {
 }
 
 
+
 	</script>
 	<style>
         @media (max-width:767px){
@@ -180,6 +222,7 @@ function durationStringFromSeconds(seconds) {
         li{
       		list-style-type:none;
     	}
+
 
 	</style>
 	<!-- navbar -->
