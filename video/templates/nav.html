@@ -33,6 +33,13 @@
 		$(document).ready( function(){
 		    $("#sug-list").hide()
 
+			// Update nav link of current page to primary
+		    $("#nav-list li a").each(function(){
+		    	if($(this).attr("href") == window.location.pathname) {
+		    		$(this).addClass("btn-primary")
+		    	}
+		    });
+
 		    $("img.flip").mouseover(function(){
 		    	var flipTemplate = $(this).attr("flip-template");
 		    	if( flipTemplate ) {
@@ -249,10 +256,8 @@ function durationStringFromSeconds(seconds) {
 
 			<!-- Collect the nav links, forms, and other content for toggling -->
 			<div class="collapse navbar-collapse" id="navbar-collapse">
-				<ul class="nav navbar-nav navbar-right">
-					<li><a class="btn-primary" href="/">Home</a></li>
-					<li class="active"><a href="{% url 'video-index' %}">Videos<span
-							class="sr-only">(current)</span></a></li>
+				<ul class="nav navbar-nav navbar-right" id="nav-list">
+					<li class="active"><a href="{% url 'video-index' %}">Videos</a></li>
 					<li><a href="{% url 'live-index' %}">Live</a></li>
 					{% if request.user.is_authenticated %}
 					<li class="dropdown">
