@@ -17,6 +17,7 @@ from django.conf.urls import url
 from django.contrib import admin
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
+from django.conf.urls import include
 
 import settings
 
@@ -24,7 +25,7 @@ from video import video_stream
 from video import views as video_views
 from video import player_view
 from live import views as live_views
-from manage_videos import views as video_manage_views
+
 import https.views as https_views
 
 urlpatterns = [
@@ -40,9 +41,8 @@ urlpatterns = [
                   url(r'^live/(\d+)$', live_views.live, name='live'),
                   url(r'^live/$', live_views.index, name='live-index'),
                   url(r'^admin/', admin.site.urls, name='admin'),
+                  url(r'^manage/', include('manage_videos.urls', namespace='manage')),
                   url(r'^accounts/login/$', auth_views.login, {'template_name': 'login.html'}),
-                  url(r'^manage/$', video_manage_views.index, name='manage'),
-                  url(r'^manage/load-dir/$', video_manage_views.load_dir, name='load-dir'),
                   url(r'^cert/', https_views.certificate_download, name='cert'),
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

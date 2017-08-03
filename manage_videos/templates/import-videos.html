@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Import Videos</title>
+	<script>
+		        function stringEndsWith(str,c) {
+            if(str==undefined || str.length == 0) return false
+
+            return str.charAt( str.length - 1 ) == c
+        }
+
+        function loadDir(dir) {
+            if(dir==undefined) {
+                dir = ""
+            }
+
+            $.post("{% url 'manage:dir' %}", { 'dir':dir, 'csrfmiddlewaretoken': getCookie('csrftoken')},
+                function(data,status){
+                if(status == "success"){
+                    var currentDir = data['current_dir']
+                    if( currentDir.length > 0 && currentDir[currentDir.length-1] != '/' ) {
+                        currentDir += '/'
+                    }
+                    var list = data['files']
+
+                    $("#import_dir").click( function(){
+                        // TODO: import dir
+                        })
+
+                    dirName = (currentDir.length > 0) ? currentDir : "/"
+                    $("#dirname").text(dirName)
+
+                    var fileList = $("#filelist")
+                    fileList.empty()
+
+                    if( currentDir.length > 0 ) {
+                        li = document.createElement("li")
+                        event = 'loadDir("' + currentDir + '..")'
+                        li.setAttribute("onclick",event)
+                        li.setAttribute("class","btn btn-link")
+                        li.innerHTML = '..'
+                        fileList.append(li)
+                    }
+
+                    for(var i=0; i<list.length; i++) {
+                        var entry = list[i]
+
+                        li = document.createElement("li")
+
+                        li.innerHTML = entry.file
+                        if(entry.isdir){
+                            path = currentDir + entry.file
+                            event = 'loadDir("' + path + '")'
+                            li.setAttribute("onclick",event)
+                            li.setAttribute("class","btn btn-link")
+                        }
+
+                        fileList.append(li)
+                    }
+                }
+		    })
+        }
+	</script>
+</head>
+<body>
+{% include 'nav.html' %}
+
+	<div class="container tab-pane fade in active panel panel-primary" id="import">
+        <div class="panel-heading"><h2 id="dirname" class="panel-title"></h2></div>
+        <ul class="panel-body" id="filelist">
+        </ul>
+        <div class="panel-footer clearfix">
+            <div class="pull-right">
+                <button id="import_dir" class="btn btn-primary">Import</button>
+            </div>
+        </div>
+	</div>
+</body>
+</html>

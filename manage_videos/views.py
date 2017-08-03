@@ -2,9 +2,13 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.http import Http404
 from homesite.settings import config_dict
+from video.models import Video, KeywordCount
+
+import json
 import os
 import re
 
+RECORDS_PER_PAGE = 50
 
 # Create your views here.
 def index(request):
@@ -50,5 +54,29 @@ def load_dir(request):
     return JsonResponse({'files': file_list, 'current_dir': current_dir})
 
 
-def manage_videos(request):
-    pass
+def db(request):
+    table = request.POST['table']
+    page = int(request.POST['pg'])
+
+    table_headers = []
+    data = []
+    if table == 'video':
+        table_headers = ['ID', 'Title', 'Duration', 'Like', 'Dislike', 'Path']
+        page_start = page * RECORDS_PER_PAGE
+        page_end = (page + 1) * RECORDS_PER_PAGE
+        videos = Video.objects.all()[page_start: page_end]
+        for v in videos:
+            data.append([v.video_id, v.title, v.duration, v.like_count, v.dislike_count, v.path])
+    elif table == 'keywords':
+        table_headers = ['Keyword', 'Count']
+        page_start = page * RECORDS_PER_PAGE
+        page_end = (page + 1) * RECORDS_PER_PAGE
+        keywords = KeywordCount.objects.all()[page_start: page_end]
+        for k in keywords:
+            data.append([k.keyword, k.count])
+
+    return JsonResponse({'headers': table_headers, 'data':data})
+
+
+def import_videos(request):
+    return render(request, 'import-videos.html')
