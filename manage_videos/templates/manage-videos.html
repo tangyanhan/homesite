@@ -16,10 +16,10 @@
 				tableName = $(this).attr("name")
 				id = $(this).attr("href")
 				id = id + ">.panel-body"
-				loadTable($(id), tableName, 0)
+				loadDbTable($(id), tableName, 0)
 			});
 
-			loadTable($("#video>.panel-body"), "video", 0)
+			loadDbTable($("#video>.panel-body"), "video", 0)
         })
 
         function createCheckboxElement(type) {
@@ -28,66 +28,71 @@
         	return element
         }
 
-        function loadTable(parent, tableName, pg)
-        {
-        	$.post("{% url 'manage:db' %}",{'table': tableName, 'pg':pg, 'csrfmiddlewaretoken': getCookie('csrftoken')},
+		function loadDbTable(parent, tableName, pg) {
+			$.post("{% url 'manage:db' %}",{'table': tableName, 'pg':pg, 'csrfmiddlewaretoken': getCookie('csrftoken')},
 			function(result,status){
 				if(status == "success"){
 					headers = result["headers"]
 					data = result["data"]
 
-					table = document.createElement("table")
-					parent.empty()
-					parent.append(table)
-					table.classList.add("table")
-					table.classList.add("table-hover")
+					createTable(parent, pg, headers, data)
+				}
+			}
+			);
+		}
 
-					thead = document.createElement("thead")
-					table.append(thead)
+        function createTable(parent, pg, headers, data)
+        {
+			table = document.createElement("table")
+			parent.empty()
+			parent.append(table)
+			table.classList.add("table")
+			table.classList.add("table-hover")
 
-					tableHeader = document.createElement("tr")
-					thead.append(tableHeader)
-					tableHeader.innerHTML = ""
-					// Add selection column
-					th = createCheckboxElement("th")
-					input = th.getElementsByClassName("checkbox")[0]
-					input.classList.add("check-all")
-					tableHeader.append(th)
-					// Listen to click event
-					$(".check-all").click(function(){
-						var checked = $(this).attr("checked")
-						if( typeof(checked) == 'undefined' ) {
-							$("input[type='checkbox']").attr("checked", true);
-						}else{
-							$("input[type='checkbox']").attr("checked", false);
-						}
-					});
+			thead = document.createElement("thead")
+			table.append(thead)
 
-					for(var i=0; i<headers.length; i++) {
-						h = headers[i]
-						th = document.createElement("th")
-						th.innerHTML = h
-						tableHeader.append(th)
-					}
-
-					tableBody = document.createElement("tbody")
-					table.append(tableBody)
-					tableBody.innerHTML = ""
-					for(var i=0; i<data.length; i++) {
-						row = data[i]
-						tr = document.createElement("tr")
-						td = createCheckboxElement("td")
-						tr.append(td)
-						for(var j=0; j<row.length; j++){
-							cell_data = row[j]
-							td = document.createElement("td")
-							td.innerHTML = cell_data
-							tr.append(td)
-						}
-						tableBody.append(tr)
-					}
+			tableHeader = document.createElement("tr")
+			thead.append(tableHeader)
+			tableHeader.innerHTML = ""
+			// Add selection column
+			th = createCheckboxElement("th")
+			input = th.getElementsByClassName("checkbox")[0]
+			input.classList.add("check-all")
+			tableHeader.append(th)
+			// Listen to click event
+			$(".check-all").click(function(){
+				var checked = $(this).attr("checked")
+				if( typeof(checked) == 'undefined' ) {
+					$("input[type='checkbox']").attr("checked", true);
+				}else{
+					$("input[type='checkbox']").attr("checked", false);
 				}
 			});
+
+			for(var i=0; i<headers.length; i++) {
+				h = headers[i]
+				th = document.createElement("th")
+				th.innerHTML = h
+				tableHeader.append(th)
+			}
+
+			tableBody = document.createElement("tbody")
+			table.append(tableBody)
+			tableBody.innerHTML = ""
+			for(var i=0; i<data.length; i++) {
+				row = data[i]
+				tr = document.createElement("tr")
+				td = createCheckboxElement("td")
+				tr.append(td)
+				for(var j=0; j<row.length; j++){
+					cell_data = row[j]
+					td = document.createElement("td")
+					td.innerHTML = cell_data
+					tr.append(td)
+				}
+				tableBody.append(tr)
+			}
         }
     </script>
 </head>

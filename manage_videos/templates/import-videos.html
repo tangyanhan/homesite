@@ -1,80 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+	{% load static %}
 	<meta charset="UTF-8">
 	<title>Import Videos</title>
+	<link href="{% static 'bootstrap-3.3.7/css/bootstrap.css' %}" rel="stylesheet">
+	<script src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+	<script src="{% static 'bootstrap-3.3.7/js/bootstrap.js' %}"></script>
+	<script src="{% static 'js/search-bar.js' %}"></script>
+	<script src="{% static 'js/create-table.js' %}"></script>
 	<script>
-		        function stringEndsWith(str,c) {
+		var currentDir = ""
+		$(document).ready(function(){
+			loadDirTable("")
+		})
+
+		function customizeRow(row, rowIdx, rowData) {
+			if(rowData[1]) { // is dir
+				row.onclick = function(){
+					path = currentDir + rowData[0]
+					loadDirTable(path)
+				}
+				row.classList.add("info")
+			}
+		}
+
+		// Customize cells
+		function customizeCell(rowIdx, colIdx, cell, cellData) {
+			if( colIdx == 1 ) {
+				cell.innerHTML = cellData? "DIR" : "File"
+			}
+		}
+
+		function stringEndsWith(str,c) {
             if(str==undefined || str.length == 0) return false
 
             return str.charAt( str.length - 1 ) == c
         }
 
-        function loadDir(dir) {
-            if(dir==undefined) {
-                dir = ""
-            }
-
+        function loadDirTable(dir){
             $.post("{% url 'manage:dir' %}", { 'dir':dir, 'csrfmiddlewaretoken': getCookie('csrftoken')},
-                function(data,status){
-                if(status == "success"){
-                    var currentDir = data['current_dir']
-                    if( currentDir.length > 0 && currentDir[currentDir.length-1] != '/' ) {
-                        currentDir += '/'
-                    }
-                    var list = data['files']
+                function(result,status){
+                	if(status == "success"){
+                		currentDir = result['current_dir']
+						if( currentDir.length > 0 && currentDir[currentDir.length-1] != '/' ) {
+							currentDir += '/'
+						}
+						$(".panel-title").text(currentDir)
 
-                    $("#import_dir").click( function(){
-                        // TODO: import dir
-                        })
-
-                    dirName = (currentDir.length > 0) ? currentDir : "/"
-                    $("#dirname").text(dirName)
-
-                    var fileList = $("#filelist")
-                    fileList.empty()
-
-                    if( currentDir.length > 0 ) {
-                        li = document.createElement("li")
-                        event = 'loadDir("' + currentDir + '..")'
-                        li.setAttribute("onclick",event)
-                        li.setAttribute("class","btn btn-link")
-                        li.innerHTML = '..'
-                        fileList.append(li)
-                    }
-
-                    for(var i=0; i<list.length; i++) {
-                        var entry = list[i]
-
-                        li = document.createElement("li")
-
-                        li.innerHTML = entry.file
-                        if(entry.isdir){
-                            path = currentDir + entry.file
-                            event = 'loadDir("' + path + '")'
-                            li.setAttribute("onclick",event)
-                            li.setAttribute("class","btn btn-link")
-                        }
-
-                        fileList.append(li)
-                    }
+						var headers = result['headers']
+						var data = result['data']
+						createTable($(".panel-body"), headers, data, customizeRow, customizeCell)
+                	}
                 }
-		    })
+            );
         }
+
 	</script>
 </head>
 <body>
 {% include 'nav.html' %}
 
-	<div class="container tab-pane fade in active panel panel-primary" id="import">
-        <div class="panel-heading"><h2 id="dirname" class="panel-title"></h2></div>
-        <ul class="panel-body" id="filelist">
-        </ul>
-        <div class="panel-footer clearfix">
-            <div class="pull-right">
-                <button id="import_dir" class="btn btn-primary">Import</button>
-            </div>
-        </div>
+<div class="container panel panel-default">
+  <div class="panel-heading"><h2 class="panel-title"></h2></div>
+  <div class="panel-body">
+    Panel content
+  </div>
+		<div class="panel-footer clearfix">
+		<div class="pull-right">
+			<button id="import_dir" class="btn btn-primary">Import</button>
+		</div>
 	</div>
+</div>
+
 </body>
 </html>
