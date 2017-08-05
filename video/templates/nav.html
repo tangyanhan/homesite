@@ -226,7 +226,17 @@ function durationStringFromSeconds(seconds) {
     			margin-right: 10px;
     			margin-bottom: 20px;
             }
+
+            .navbar-header>.input-group{
+				max-width: 320px;
+			}
         }
+
+		@media (min-width:993px){
+			.navbar-header>.input-group{
+				max-width: 400px;
+			}
+		}
 
         .container{
             margin-top:0;
@@ -269,6 +279,9 @@ function durationStringFromSeconds(seconds) {
       		list-style-type:none;
     	}
 
+		.navbar-header>.input-group{
+			margin-top:15px;
+		}
 
 	</style>
 	<!-- navbar -->
@@ -282,7 +295,7 @@ function durationStringFromSeconds(seconds) {
 					<span class="glyphicon glyphicon-menu-hamburger" style="color:#337ab7;"></span>
 				</button>
 
-				<div class="input-group" style="margin-top:15px;max-width:400px;">
+				<div class="input-group">
         <span class="input-group-addon" id="search_button">
           <span class="glyphicon glyphicon-search"></span>
         </span>
