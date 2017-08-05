@@ -18,6 +18,25 @@
         padding:0;
     }
 
+    #play-button{
+    	position: absolute;
+    	width: 68px;
+    	height: 48px;
+    	left: 50%;
+    	top: 50%;
+    	margin-top: -24px;
+    	margin-left: -34px;
+    	color: white;
+    	background-color: rgba(41, 41, 41, 0.7);
+    	border-width: 0;
+    	border-radius: 6px;
+		z-index: 5;
+    }
+
+    #play-button:hover{
+    	background-color: rgba(241, 48, 37, 0.7);
+    }
+
 
 	</style>
 	<script>
@@ -40,16 +59,14 @@
 			loadRate(-1)
 		} )
 
-		$("video,#vidStatus").click(function(){
+		$("video, #play-button").click(function(){
 			var video = $("video")[0]
 			if( video.paused ) {
 			  video.play()
-			  $("#vidStatus").attr("class","fui-pause")
-			  $("#vidStatus").hide()
+			  $("#play-button").hide()
 			}else{
 			  video.pause()
-			  $("#vidStatus").attr("class","fui-play")
-			  $("#vidStatus").show()
+			  $("#play-button").show()
 			}
 		})
 	});
@@ -91,13 +108,18 @@
 {% include 'nav.html' %}
 
 <div class="container body-container">
-	<video id="my-player" controls preload="auto" data-setup=""
+	<div style="position: relative;">
+		<video id="my-player" controls preload="auto" data-setup=""
 		   poster="{% static 'cover' %}/{{ video }}.png">
 		<source src="{% url 'stream' video %}" type="video/mp4">
 		<p>
       	Your browser doesn't support HTML5 video.
     	</p>
-	</video>
+
+		</video>
+		<button id="play-button" type="button" class="glyphicon glyphicon-play"></button>
+	</div>
+
 
 	<div>
 		<button type="button" class="btn btn-default glyphicon glyphicon-thumbs-up"></button>
