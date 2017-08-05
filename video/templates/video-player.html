@@ -25,6 +25,10 @@
     	$("video").height($("video").width() * (9/16));
     	console.log("Width:" + $("video").width() + " Height:" + $("video").height())
 
+    	window.onresize = function() {
+    		$("video").height($("video").width() * (9/16));
+    	}
+
 		loadRate(0)
 		loadRecommendVideos()
 
