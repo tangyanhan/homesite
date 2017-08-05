@@ -1,52 +1,17 @@
 <header>
 	{% load static %}
-	<script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
-	<script type="text/javascript" src="{% static 'js/search-bar.js' %}"></script>
-	<script type="text/javascript" src="{% static 'js/pageidx.js' %}"></script>
-	<script type="text/javascript" src="{% static 'bootstrap-3.3.7/js/bootstrap.js' %}"></script>
+
 	<link href="{% static 'bootstrap-3.3.7/css/bootstrap.css' %}" rel="stylesheet">
+	<link href="{% static 'css/common.css' %}" rel="stylesheet">
+	<script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'bootstrap-3.3.7/js/bootstrap.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/search-bar.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/flip.js' %}"></script>
 	<script>
-		var timer
-		var originalSrc
-		function getAttr(element, attr, defValue) {
-			var value = element.attr(attr)
-			if( !value ) {
-				return defValue
-			}
-			return value
-		}
-
-		function startFlip(element, template, interval, next, start, end) {
-			if(next > end) {
-				next = start
-			}
-			var imgSrc = template.replace(/{index}/, next + "")
-			element.attr("src", imgSrc)
-			timer = setTimeout(startFlip.bind(null, element, template, interval, next+1, start, end), interval)
-		}
-
-		function stopFlip(element, imgSrc) {
-			clearTimeout(timer)
-			element.attr("src", imgSrc)
-		}
-
-		function resizeThumb() {
-			var thumbWidth = $(".thumb-container").width()
-			var thumbHeight = thumbWidth * 9 / 16
-			$(".thumb-container").css("height", thumbHeight)
-			// Scale image manually
-			$(".thumb-image").css("width", thumbWidth)
-			$(".thumb-image").css("height", thumbHeight)
-		}
-
 		$(document).ready( function(){
-		    $("#sug-list").hide()
-
-			resizeThumb()
-
-			$(window).resize( function(){
-				resizeThumb()
-			} );
+			setupThumbListener()
+			setupFlipListener()
+			setupSearchBarListener()
 
 			// Update nav link of current page to primary
 		    $("#nav-list li a").each(function(){
@@ -54,236 +19,8 @@
 		    		$(this).addClass("btn-primary")
 		    	}
 		    });
-
-		    $(".thumb-container").click(function(){
-		    	window.open($(this).attr("link"));
-		    });
-
-		    $("img.flip").mouseover(function(){
-		    	var flipTemplate = $(this).attr("flip-template");
-		    	if( flipTemplate ) {
-		    		console.log(flipTemplate);
-		    	}
-		    	var flipInterval = getAttr($(this), "flip-interval", 800)
-		    	var flipStart = getAttr($(this), "flip-start", 1)
-		    	var flipEnd = getAttr($(this), "flip-end", 16)
-		    	originalSrc = $(this).attr("src")
-		    	timer = setTimeout(startFlip.bind(null, $(this), flipTemplate, flipInterval, flipStart, flipStart, flipEnd), 1000)
-		    });
-
-		    $("img.flip").mouseleave(function(){
-				stopFlip($(this), originalSrc)
-		    });
-
-			$("#search_button").click(function(){
-			  search( $("#keyword_input").val() )
-			})
-
-            $("#keyword_input").focus(function(){
-                showSuggestion()
-            })
-
-			$("#keyword_input").keyup(function(event){
-				showSuggestion()
-			})
-
-			$("#keyword_input").focus(function(){
-			    showSuggestion()
-			})
-
-			$(document).click(function(e){
-			 e = window.event || e; // 兼容IE7
-			 obj = $(e.srcElement || e.target);
-			    if ($(obj).is("#sug-list,#sug-list *,#keyword_input")) {
-			   } else {
-			   	$("#sug-list").hide()
-			 }
-			});
-
-			$('#keyword_input').bind('keypress',function(event){
-	            if(event.keyCode == "13")
-    	        {
-        	        search($(this).val())
-            	}
-        	})
 		});
-
-function showSuggestionList(keywords) {
-    if(keywords.length == 0) return
-
-    var ul = $("#sug-list")
-    ul.empty()
-    for (var i = keywords.length - 1; i >= 0; i--) {
-        li = document.createElement("li")
-            a = document.createElement("a")
-            a.href = getLocation(keywords[i],0)
-            a.innerHTML = keywords[i]
-            li.append(a)
-        ul.append(li)
-    }
-    $("#sug-list").show()
-}
-
-function showSuggestion() {
-    var keyword = document.getElementById("keyword_input").value
-
-    keyword = processKeyword(keyword)
-
-    if(keyword.length == 0) {
-        var historyKeywords = getCookie("history-keywords")
-        if(historyKeywords.length > 0){
-            keywords = historyKeywords.split("##")
-
-            showSuggestionList(keywords)
-        }
-    }else{
-		$.post("{% url 'keyword_suggest' %}", { 'keyword':keyword, 'csrfmiddlewaretoken': getCookie('csrftoken')},
-			function(data,status){
-			if(status == "success"){
-				var keywords = data['keywords']
-				showSuggestionList(keywords)
-			}
-		})
-    }
-
-}
-
-function search(keyword) {
-
-    if(typeof keyword == "undefined" || keyword==null){
-        keyword = $("#keyword_input").val()
-    }
-
-	keyword = processKeyword(keyword)
-
-    if(keyword.length == 0 || keyword == " ") return false
-
-    //Add it to cookie if it does not exist
-    addHistoryKeyword(keyword)
-
-    $("#keyword_input").blur()
-    $("#sug-list").hide()
-
-	window.location.href = getLocation(keyword, 0)
-}
-
-function processKeyword(keyword){
-	keyword = keyword.toLowerCase()
-    keyword = keyword.replace(/\s+/, ' ')
-    keyword = keyword.replace(/&/,'')
-
-    return keyword
-}
-
-function getLocation(keyword, pageIndex) {
-	return "{% url 'search' %}" + "?&keyword=" + keyword + "&idx=" + pageIndex
-}
-
-function durationStringFromSeconds(seconds) {
-	var duration = ""
-
-	var sec = seconds % 60
-	var min = parseInt(seconds / 60)
-	var hour = 0
-	if (min >= 60) {
-		hour = parseInt(min / 60)
-		min %= 60
-
-		duration += hour
-	 }
-
-	duration = duration + ((hour>0)? ":" : "") +((min<10)? "0" : "") + min + ":" + ((sec<10)? "0" :"") + sec
-
-	return duration
-}
-
-
-
 	</script>
-	<style>
-
-        @media (max-width:767px){
-            .container{
-                width:100%;
-            }
-
-            li.thumb-container {
-            	width: 100%;
-            	margin-left: 0;
-            	margin-right: 0;
-            	margin-top: 0;
-            	margin-bottom: 10px;
-            }
-        }
-        @media (min-width:768px){
-            .container{
-                margin-left:30px;
-                margin-right:30px;
-            }
-
-            li.thumb-container {
-                width: 240px;
-    			margin-right: 10px;
-    			margin-bottom: 20px;
-            }
-
-            .navbar-header>.input-group{
-				max-width: 320px;
-			}
-        }
-
-		@media (min-width:993px){
-			.navbar-header>.input-group{
-				max-width: 400px;
-			}
-		}
-
-        .container{
-            margin-top:0;
-        }
-        .body-container{
-        	background-color: #F1F1F1;
-        }
-
-        .navbar{
-        	background-color: #FFF;
-        }
-
-        a{
-        	color: #000;
-        }
-
-		#nav-list>li>a{
-		    font-family: Oswald Regular,Arial,sans-serif;
-    		font-size: 1.6rem;
-		}
-
-        li>a:hover, li>a:focus {
-        	color: #DF4135;
-        }
-
-        body{
-        	background-color: #F1F1F1;
-        }
-
-        .btn-primary, .btn-primary:focus, .btn-primary:hover{
-        	color: #FFF;
-        	background-color: #DF4738 !important;
-        }
-
-        #sug-list{
-        	z-index:5; width:100%;position:absolute;color:000;top:36px;background-color: #fff;list-style-type: none;padding: 0;padding-left: 5px;margin: 0;border: 1px solid #ccc;border-top: none;display: block;
-        }
-
-        li{
-      		list-style-type:none;
-    	}
-
-		.navbar-header>.input-group{
-			margin-top:15px;
-		}
-
-	</style>
 	<!-- navbar -->
 	<nav class="navbar nav-default">
 		<div class="container">
@@ -334,5 +71,4 @@ function durationStringFromSeconds(seconds) {
 
 		</div><!-- /.container-fluid -->
 	</nav>
-
 </header>

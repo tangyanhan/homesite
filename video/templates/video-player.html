@@ -1,108 +1,20 @@
 <head>
 	{% load static %}
-	<script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
-
 	<link href="{% static 'bootstrap-3.3.7/css/bootstrap.css' %}" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="{% static 'css/video-thumb.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'css/my-player.css' %}">
+	<script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/video-thumb.js' %}"></script>
-	<style>
-
-    video{
-      width: 100%;
-  		max-width: 100%;
-    	width: 100%;
-        background-color: #424242;
-    }
-
-    #videos{
-        padding:0;
-    }
-
-    #play-button{
-    	position: absolute;
-    	width: 68px;
-    	height: 48px;
-    	left: 50%;
-    	top: 50%;
-    	margin-top: -24px;
-    	margin-left: -34px;
-    	color: white;
-    	background-color: rgba(41, 41, 41, 0.7);
-    	border-width: 0;
-    	border-radius: 6px;
-		z-index: 5;
-    }
-
-    #play-button:hover{
-    	background-color: rgba(241, 48, 37, 0.7);
-    }
-
-
-	</style>
-	<script>
-    $(document).ready( function(){
-    	$("video").height($("video").width() * (9/16));
-    	console.log("Width:" + $("video").width() + " Height:" + $("video").height())
-
-    	window.onresize = function() {
-    		$("video").height($("video").width() * (9/16));
-    	}
-
-		loadRate(0)
-		loadRecommendVideos()
-
-		$("button.glyphicon.glyphicon-thumbs-up").click( function(){
-			loadRate(1)
-		} )
-
-		$("button.glyphicon.glyphicon-thumbs-down").click( function(){
-			loadRate(-1)
-		} )
-
-		$("video, #play-button").click(function(){
-			var video = $("video")[0]
-			if( video.paused ) {
-			  video.play()
-			  $("#play-button").hide()
-			}else{
-			  video.pause()
-			  $("#play-button").show()
-			}
-		})
-	});
-
-    function loadRate(option){
-      	$.post("{% url 'rate-video' %}", { 'id':{{ video }}, 'op':option,'csrfmiddlewaretoken': getCookie('csrftoken')},
-			function(data,status){
-			if(status == "success"){
-				//var counts = JSON.parse(data)
-				likeCount = data["like"]
-				dislikeCount = data["dislike"]
-
-				$("button.glyphicon.glyphicon-thumbs-up").text(likeCount)
-				$("button.glyphicon.glyphicon-thumbs-down").text(dislikeCount)
-			}
-		})
-    }
-
-    function loadRecommendVideos(){
-      $.post("{% url 'recommend-videos' %}", { 'id':{{ video }}, 'csrfmiddlewaretoken': getCookie('csrftoken') },
-        function(data,status){
-          var vidList = $("#videos")
-          vidList.empty()
-          var videos = data['videos']
-          for( var i=0; i<videos.length; i++ ) {
-            video = videos[i]
-            li = createThumbFromVideo(video)
-            vidList.append(li)
-          }
-      })
-    }
-
-
+	<script type="text/javascript" src="{% static 'js/my-player.js' %}"></script>
+	<script type="text/javascript">
+		$(document).ready( function(){
+			var recommendUrl = "{% url 'recommend-videos' %}";
+			var rateUrl = "{% url 'rate-video' %}";
+			var videoId = {{ video }};
+			setupPlayerListener(rateUrl, recommendUrl, videoId);
+		});
 	</script>
 </head>
-
 <body>
 
 {% include 'nav.html' %}
@@ -119,7 +31,6 @@
 		</video>
 		<button id="play-button" type="button" class="glyphicon glyphicon-play"></button>
 	</div>
-
 
 	<div>
 		<button type="button" class="btn btn-default glyphicon glyphicon-thumbs-up"></button>

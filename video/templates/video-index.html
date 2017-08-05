@@ -6,64 +6,16 @@
 	<script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
 	<link rel="stylesheet" type="text/css" href="{% static 'css/video-thumb.css' %}">
 	<script type="text/javascript" src="{% static 'js/video-thumb.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/pageidx.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/search-bar.js' %}"></script>
 	<script>
 		$(document).ready( function(){
-		    $("#sug-list").hide()
-			loadPage()
+		    var keyword = "{{ keyword }}";
+			var pageIndex = {{ idx }};
+			var pageNum = {{ pageNum }};
+			results = {{ results|safe }};
+			loadSearchPage(keyword, pageIndex, pageNum, results);
 		});
-
-function loadPage() {
-	var keyword = "{{ keyword }}"
-	var pageIndex = {{ idx }}
-	var pageNum = {{ pageNum }}
-	results = {{ results|safe }};
-
-	$("#search_query_query").value = keyword
-
-	// Deal with title
-	title = "视频首页"
-	if( keyword.length > 0 ) {
-		title = keyword
-		if( pageIndex > 0 ) {
-			title = title + "#" + pageIndex
-		}
-	}
-
-	document.title = title
-
-	var videoDiv = $("#videos")
-	videoDiv.empty() //remove old results
-
-    var emptyHint = document.getElementById("empty-hint")
-	if( results.length == 0 ) {
-	    emptyHint.visible = true
-	    if(keyword.length == 0) {
-	        emptyHint.innerHTML = "目前没有收录任何视频"
-	    }else{
-	        emptyHint.innerHTML = "没有找到 <b>" + keyword + "</b> 的相关搜索结果"
-	    }
-	}else{
-	    emptyHint.visible = false;
-	}
-
-    for(var i=0; i<results.length; i++) {
-        video = results[i]
-        li = createThumbFromVideo(video)
-        videoDiv.append(li)
-    }
-
-	//recreate page index if necessary
-	updatePageIndex(pageIndex, pageNum, keyword, getLocation)
-
-	$("pagination-summary").innerHTML = ""
-	if( results.length > 0 ) {
-	    if( keyword.length > 0 ) {
-	        $("pagination-summary").innerHTML = "Showing " + results.length + " results on page " + (pageIndex + 1) + " of " + pageNum + "using keyword:" + keyword
-	    }else{
-	        $("pagination-summary").innerHTML = "Showing " + results.length + " results on page " + (pageIndex + 1) + " of " + pageNum
-	    }
-	}
-}
 
 	</script>
 	<style>
@@ -90,16 +42,12 @@ function loadPage() {
 
 <div class="container body-container">
 	<h2 id="empty-hint"></h2>
-	<ul class="row" id="videos">
-	</ul>
+	<ul class="row" id="videos"></ul>
 
 	<nav class="" aria-label="Page navigation">
-		<ul id="pages" class="pagination">
-		</ul>
+		<ul id="pages" class="pagination"></ul>
 	</nav>
-
 </div>
-
 
 </body>
 </html>

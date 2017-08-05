@@ -1,5 +1,43 @@
+function setupThumbListener() {
+    resizeThumb()
 
-function createThumbFromVideo(video){
+    $(window).resize( function(){
+        resizeThumb()
+    } );
+
+    $(".thumb-container").click(function(){
+        window.open($(this).attr("link"));
+    });
+}
+
+function resizeThumb() {
+    var thumbWidth = $(".thumb-container").width()
+    var thumbHeight = thumbWidth * 9 / 16
+    $(".thumb-container").css("height", thumbHeight)
+    // Scale image manually
+    $(".thumb-image").css("width", thumbWidth)
+    $(".thumb-image").css("height", thumbHeight)
+}
+
+function durationStringFromSeconds(seconds) {
+	var duration = ""
+
+	var sec = seconds % 60
+	var min = parseInt(seconds / 60)
+	var hour = 0
+	if (min >= 60) {
+		hour = parseInt(min / 60)
+		min %= 60
+
+		duration += hour
+	 }
+
+	duration = duration + ((hour>0)? ":" : "") +((min<10)? "0" : "") + min + ":" + ((sec<10)? "0" :"") + sec
+
+	return duration
+}
+
+function createThumbFromVideo(video) {
     li = document.createElement("li")
     li.setAttribute("class", "thumb-container")
 
