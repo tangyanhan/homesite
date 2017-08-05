@@ -5,46 +5,51 @@
 	<link href="{% static 'bootstrap-3.3.7/css/bootstrap.css' %}" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="{% static 'css/video-thumb.css' %}">
 	<script type="text/javascript" src="{% static 'js/video-thumb.js' %}"></script>
-	<link href="http://vjs.zencdn.net/6.2.4/video-js.css" rel="stylesheet">
-
-	<!-- If you'd like to support IE8 -->
-	<script src="http://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script>
 	<style>
 
     video{
+      width: 100%;
+  		max-width: 100%;
+    	width: 100%;
         background-color: #424242;
     }
+
     #videos{
         padding:0;
     }
 
+
 	</style>
 	<script>
     $(document).ready( function(){
-      loadRate(0)
-      loadRecommendVideos()
+    	$("video").height($("video").width() * (9/16));
+    	console.log("Width:" + $("video").width() + " Height:" + $("video").height())
 
-      $("button.glyphicon.glyphicon-thumbs-up").click( function(){
-        loadRate(1)
-      } )
+		loadRate(0)
+		loadRecommendVideos()
 
-      $("button.glyphicon.glyphicon-thumbs-down").click( function(){
-        loadRate(-1)
-      } )
+		$("button.glyphicon.glyphicon-thumbs-up").click( function(){
+			loadRate(1)
+		} )
 
-      $("video,#vidStatus").click(function(){
-        var video = $("video")[0]
-        if( video.paused ) {
-          video.play()
-          $("#vidStatus").attr("class","fui-pause")
-          $("#vidStatus").hide()
-        }else{
-          video.pause()
-          $("#vidStatus").attr("class","fui-play")
-          $("#vidStatus").show()
-        }
-      })
-    });
+		$("button.glyphicon.glyphicon-thumbs-down").click( function(){
+			loadRate(-1)
+		} )
+
+		$("video,#vidStatus").click(function(){
+			var video = $("video")[0]
+			if( video.paused ) {
+			  video.play()
+			  $("#vidStatus").attr("class","fui-pause")
+			  $("#vidStatus").hide()
+			}else{
+			  video.pause()
+			  $("#vidStatus").attr("class","fui-play")
+			  $("#vidStatus").show()
+			}
+		})
+	});
+
     function loadRate(option){
       	$.post("{% url 'rate-video' %}", { 'id':{{ video }}, 'op':option,'csrfmiddlewaretoken': getCookie('csrftoken')},
 			function(data,status){
@@ -73,6 +78,7 @@
       })
     }
 
+
 	</script>
 </head>
 
@@ -81,16 +87,13 @@
 {% include 'nav.html' %}
 
 <div class="container body-container">
-	<video class="video-js vjs-default-skin vjs-16-9" controls="controls" preload="auto"
-		   poster="{% static 'cover' %}/{{ video }}.png" data-setup="{}">
+	<video id="my-player" controls preload="auto" data-setup=""
+		   poster="{% static 'cover' %}/{{ video }}.png">
 		<source src="{% url 'stream' video %}" type="video/mp4">
-		<p class="vjs-no-js">
-			To view this video please enable JavaScript, and consider upgrading to a web browser that
-			<a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
-		</p>
+		<p>
+      	Your browser doesn't support HTML5 video.
+    	</p>
 	</video>
-
-	<script src="http://vjs.zencdn.net/6.2.4/video.js"></script>
 
 	<div>
 		<button type="button" class="btn btn-default glyphicon glyphicon-thumbs-up"></button>
