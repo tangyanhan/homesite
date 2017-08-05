@@ -30,14 +30,33 @@
 			element.attr("src", imgSrc)
 		}
 
+		function resizeThumb() {
+			var thumbWidth = $(".thumb-container").width()
+			var thumbHeight = thumbWidth * 9 / 16
+			$(".thumb-container").css("height", thumbHeight)
+			// Scale image manually
+			$(".thumb-image").css("width", thumbWidth)
+			$(".thumb-image").css("height", thumbHeight)
+		}
+
 		$(document).ready( function(){
 		    $("#sug-list").hide()
+
+			resizeThumb()
+
+			$(window).resize( function(){
+				resizeThumb()
+			} );
 
 			// Update nav link of current page to primary
 		    $("#nav-list li a").each(function(){
 		    	if($(this).attr("href") == window.location.pathname) {
 		    		$(this).addClass("btn-primary")
 		    	}
+		    });
+
+		    $(".thumb-container").click(function(){
+		    	window.open($(this).attr("link"));
 		    });
 
 		    $("img.flip").mouseover(function(){
@@ -53,7 +72,6 @@
 		    });
 
 		    $("img.flip").mouseleave(function(){
-				console.log("Left img")
 				stopFlip($(this), originalSrc)
 		    });
 
@@ -183,9 +201,18 @@ function durationStringFromSeconds(seconds) {
 
 	</script>
 	<style>
+
         @media (max-width:767px){
             .container{
                 width:100%;
+            }
+
+            li.thumb-container {
+            	width: 100%;
+            	margin-left: 0;
+            	margin-right: 0;
+            	margin-top: 0;
+            	margin-bottom: 10px;
             }
         }
         @media (min-width:768px){
@@ -193,7 +220,14 @@ function durationStringFromSeconds(seconds) {
                 margin-left:30px;
                 margin-right:30px;
             }
+
+            li.thumb-container {
+                width: 240px;
+    			margin-right: 10px;
+    			margin-bottom: 20px;
+            }
         }
+
         .container{
             margin-top:0;
         }
