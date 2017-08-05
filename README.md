@@ -10,6 +10,15 @@ This project aims to create a media center site for home use.
 
 * Backup service that upload local important files to 3rd party cloud service
 
+## Kick Start
+
+1. ./collect_video [your dir containing mp4 videos]
+   Your files will be retrieved recursively, all .mp4 files will be collected to database.
+   Covers/thumbnails/flips(fake animated preview pictures) will be generated during this process,
+   and they will be put to static/cover, static/thumb, static/flip respectively
+2. ./manage.py runserver ip_addr:port_number
+   Now your home site is on the go!
+
 ## Implemented Features
 
 * HTML5 based main page that is flexible on PC/mobile devices
