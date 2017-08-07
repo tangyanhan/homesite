@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    replaces = [(b'video', '0001_initial'), (b'video', '0002_auto_20170307_0726'), (b'video', '0003_video_need_convert'), (b'video', '0004_auto_20170313_0840'), (b'video', '0005_remove_video_need_convert'), (b'video', '0006_video_rating'), (b'video', '0007_auto_20170807_0257')]
+    replaces = [(b'video', '0001_initial')]
 
     initial = True
 
