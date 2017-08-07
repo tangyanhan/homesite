@@ -33,19 +33,21 @@ This project aims to create a media center site for home use.
 
 #### HTML5 Video Player
 
-* Better player appearance
+* [x] Better player appearance
 
-* Add tags to the video
+* [ ] Add tags to the video
 
-* Like/Disklike count
+* [x] Like/Disklike count
  
-* Play count
+* [ ] Play count
 
-* Delete video with supervisor account
+* [ ] Movie rating system + Account system
 
-* Recommend videos beside the player
+* [ ] Delete video with supervisor account
 
-* Convert button
+* [ ] Recommend videos beside the player
+
+* [ ] Convert button
 
 #### Video Collection
 
