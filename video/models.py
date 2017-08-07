@@ -16,8 +16,20 @@ class Video(models.Model):
     watch_count = models.PositiveIntegerField(default=0)
     last_watch_date = models.DateField(null=True, default=None)  # Count in days
     # Similar to American movie rating system.
-    # Audience age>rating is allowed to watch the movie
-    rating = models.IntegerField(default=17)
+    # Audience permission>rating is allowed to watch the movie
+    G = 'G'
+    PG = 'PG'
+    PG13 = 'PG13'
+    R = 'R'
+    NC17 = 'NC17'
+    RATING_CHOICES = (
+        (G, 'For general audiences'),
+        (PG, 'Parental guidance'),
+        (PG13, 'Parents Strongly Cautioned'),
+        (R, 'Restricted'),
+        (NC17, 'NO ONE AND UNDER 17 ADMITTED')
+    )
+    rating = models.CharField(max_length=4, choices=RATING_CHOICES, default=R)
 
 
 class KeywordCount(models.Model):
