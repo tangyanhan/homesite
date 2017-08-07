@@ -7,8 +7,6 @@ from subprocess import Popen, PIPE
 import re
 import traceback
 
-# TODO: we should make it in a public library like 'supported format'
-supported_video_formats = ['mp4', 'mov', 'wmv', 'rmvb', 'rm', 'avi']
 
 KEYWORDS_BLACKLIST = []
 
@@ -20,6 +18,8 @@ FLIP_DIR = './static/flip'
 FLIP_NUM = 16
 
 g_change_db = True
+
+VIDEO_RATING = None  # Default video rating for current collection
 
 FILE_NAME_REG = None
 
@@ -40,17 +40,7 @@ def extract_filename_tuple(file_path):
     """
     global FILE_NAME_REG
     if FILE_NAME_REG is None:
-        formats = ''
-        first = True
-        global supported_video_formats
-        for f in supported_video_formats:
-            if first:
-                first = False
-            else:
-                formats += r'|'
-            formats += f
-
-        FILE_NAME_REG = re.compile(r'(.*)/([^/]+)\.(' + formats + r')$', re.UNICODE | re.IGNORECASE)
+        FILE_NAME_REG = re.compile(r'(.*)/([^/]+)\.(mp4)$', re.UNICODE | re.IGNORECASE)
 
     match = FILE_NAME_REG.match(file_path)
 
@@ -177,23 +167,9 @@ def visit_dir(base_dir):
                 if file_name.startswith('.'):
                     continue
 
-                need_convert = False
-                if ext.lower() != 'mp4':
-                    need_convert = True
-                    # Disable video convert for the time being, we should convert them in idle time
-                    if True:
-                        mp4_path = os.path.join(file_dir, file_name)
-                        mp4_path += '.mp4'
-                        if not convert_video_to_mp4(file, mp4_path):
-                            log.error('#Failed to convert file to mp4: {0}'.format(file))
-                            continue
-                        else:
-                            need_convert = False
-                            file = mp4_path
-                            ext = 'mp4'
-                elif os.path.getsize(file_path) == 0:
-                    log.info('Remove invalid video file: {0}'.format(file))
-                    os.remove(file)
+                if os.path.getsize(file_path) == 0:
+                    log.info('Remove invalid video file: {0}'.format(file_path))
+                    os.remove(file_path)
                     continue
 
                 videos = Video.objects.filter(path=file_path)
@@ -202,7 +178,7 @@ def visit_dir(base_dir):
                     continue
                 video = Video()
                 video.video_id = next_video_id()
-                video.need_convert = need_convert
+                video.rating = VIDEO_RATING
 
                 thumb_path = get_thumb_path(video.video_id)
                 cover_path = get_cover_path(video.video_id)
@@ -226,7 +202,6 @@ def visit_dir(base_dir):
                     else:
                         log.info('#Added keyword:{0}'.format(key))
 
-                    data = None
                     if key in dict:
                         data = dict[key]
                     else:
@@ -366,9 +341,21 @@ if __name__ == '__main__':
 
     search_dir = sys.argv[1]
 
+    VIDEO_RATING = Video.NC17
     if len(sys.argv) > 2:
-        if sys.argv[2] == 'nosave':
-            g_change_db = False
+        for arg in sys.argv:
+            if arg == 'nosave':
+                g_change_db = False
+            elif arg.startswith('rating='):
+                VIDEO_RATING = arg[len('rating='):]
+                rating_detail = [v for k, v in Video.RATING_CHOICES if k == VIDEO_RATING]
+                if rating_detail:
+                    log.info("Movie rating: {0} {1}".format(VIDEO_RATING, rating_detail))
+                else:
+                    log.error("Invalid rating option: {0}. Valid options are {1}".
+                              format(VIDEO_RATING, [k for k, v in Video.RATING_CHOICES]))
+                    sys.exit(1)
+
     keyword_file = 'keywords.blacklist'
     try:
         with open(keyword_file, 'r') as kfp:
