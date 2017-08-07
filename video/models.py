@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from django.contrib.auth.models import User
 from django.db import models
 
 KEYWORD_MAX_LENGTH = 100
@@ -17,19 +18,29 @@ class Video(models.Model):
     last_watch_date = models.DateField(null=True, default=None)  # Count in days
     # Similar to American movie rating system.
     # Audience permission>rating is allowed to watch the movie
-    G = 'G'
-    PG = 'PG'
-    PG13 = 'PG13'
-    R = 'R'
-    NC17 = 'NC17'
+    G = 0
+    PG = 1
+    PG13 = 2
+    R = 3
+    NC17 = 4
+    P = 5
+    RATING_MAP = {
+        'G': 0,
+        'PG': 1,
+        'PG13': 2,
+        'R': 3,
+        'NC17': 4,
+        'P': 5
+    }
     RATING_CHOICES = (
-        (G, 'For general audiences'),
-        (PG, 'Parental guidance'),
-        (PG13, 'Parents Strongly Cautioned'),
-        (R, 'Restricted'),
-        (NC17, 'NO ONE AND UNDER 17 ADMITTED')
+        (G, 'G: For general audiences'),
+        (PG, 'PG: Parental guidance'),
+        (PG13, 'PG13: Parents Strongly Cautioned'),
+        (R, 'R: Restricted'),
+        (NC17, 'NC17: NO ONE AND UNDER 17 ADMITTED'),
+        (P, 'Private: Videos for private access')
     )
-    rating = models.CharField(max_length=4, choices=RATING_CHOICES, default=R)
+    rating = models.PositiveIntegerField(choices=RATING_CHOICES, default=P)
 
 
 class KeywordCount(models.Model):
@@ -39,4 +50,9 @@ class KeywordCount(models.Model):
 
 class KeywordVideoId(models.Model):
     keyword = models.CharField(null=False, max_length=KEYWORD_MAX_LENGTH)
-    video_id = models.PositiveIntegerField(primary_key=True)
+    video = models.ForeignKey(Video)
+
+
+
+
+

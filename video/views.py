@@ -9,57 +9,24 @@ import traceback
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
+from django.http import Http404
 from django.shortcuts import render_to_response
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
+from django.db.models.query import QuerySet
+from django.db.models import Q
 from models import Video
 from models import KeywordCount
 from models import KeywordVideoId
 from models import KEYWORD_MAX_LENGTH
+from custom_user.models import CustomUser
+from util import log
 
 
 RECENT_DAYS = 7
 
 MAX_KEYWORD_LEN = 50
 
-RESULT_NUM_PER_PAGE = 40.0  # Make it float to avoid bad results from ceil when calculating total page num
-
-RECENT_CACHE = {
-    'date': '',
-    'records': []
-}
-
-SEARCH_CACHE = {
-    # keyword : [result list] TODO: add date
-}
-
-
-# Create your views here.
-def load_recent_records():
-    today = datetime.date.today()
-
-    global RECENT_CACHE
-    if len(RECENT_CACHE['date']) > 0:
-        delta = today - RECENT_CACHE['date']
-        # If recent is loaded less than 1 day ago, ignore it
-        if delta.days < 1:
-            return RECENT_CACHE['records']
-
-    global RECENT_DAYS
-    min_date = today - datetime.timedelta(days=RECENT_DAYS)
-    recent_records = Video.objects.filter(
-        import_date__range=[min_date.strftime('%Y-%m-%d'), today.strftime('%Y-%m-%d')])
-
-    RECENT_CACHE['records'] = []
-
-    l = RECENT_CACHE['records']
-    for video in recent_records:
-        dict = dict_for_video(video)
-        if dict is None:
-            continue
-
-        l.append(dict)
-    return l
+RESULT_NUM_PER_PAGE = 40  # Make it float to avoid bad results from ceil when calculating total page num
 
 
 def dict_for_video(video):
@@ -69,7 +36,6 @@ def dict_for_video(video):
     return None
 
 
-@login_required()
 def videos(request):
     try:
         keyword = None
@@ -78,18 +44,20 @@ def videos(request):
         idx = 0
         if 'idx' in request.GET:
             idx = int(request.GET['idx'])
+        rating = Video.G
+        if isinstance(request.user, CustomUser):
+            rating = request.user.rating
 
-        results = []
-        if keyword is None or len(keyword) == 0:
-            results = load_recent_records()
+        if not keyword:
+            records = Video.objects.filter(rating__lte=rating).order_by('-import_date')
+            results = [dict_for_video(video) for video in records]
             keyword = ''
         else:
             # Deal with keyword
             keys = convert_keyword(keyword)
 
             keyword = ' '.join(keys)
-            with_keyword = load_search_result_with_keyword(keys)
-            results = with_keyword
+            results = load_search_result_with_keyword(keys, rating)
 
         if not results:
             return render(request, 'video-index.html', {
@@ -99,26 +67,24 @@ def videos(request):
                 'results': json.dumps([])}
                           )
 
-        global RESULT_NUM_PER_PAGE
-        page_num = math.ceil(len(results) / RESULT_NUM_PER_PAGE)  # TODO: check if python has a same old ceil problem
+        page_num = math.ceil(1.0 * len(results) / RESULT_NUM_PER_PAGE)
 
-        num = page_num
-        if idx >= num:
-            return render(request, '404.html')
+        if idx >= page_num:
+            raise Http404
 
-        begin_idx = int(idx * RESULT_NUM_PER_PAGE)
-        end_idx = int(begin_idx + RESULT_NUM_PER_PAGE)
+        begin_idx = idx * RESULT_NUM_PER_PAGE
+        end_idx = begin_idx + RESULT_NUM_PER_PAGE
         if end_idx > len(results):
             end_idx = len(results)
 
-        page_records = results[begin_idx:end_idx]
+        results = results[begin_idx:end_idx]
 
         return render(request, 'video-index.html',
                       {
                         'keyword': keyword,
                         'idx': idx,
                         'page_num': page_num,
-                        'results': json.dumps(page_records)
+                        'results': json.dumps(results)
                       }
                       )
     except:
@@ -143,36 +109,19 @@ def convert_keyword(keyword):
     return keys
 
 
-def load_search_result_with_keyword(keys):
+def load_search_result_with_keyword(keys, rating):
     try:
-        # pdb.set_trace()
-        result_set = set()
+        condition = Q()
         for key in keys:
-            period_set = set()
-            if key in SEARCH_CACHE:
-                period_set = SEARCH_CACHE[key]
-            else:
-                merged_records = KeywordVideoId.objects.filter(keyword__icontains=key)
-                for record in merged_records:
-                    period_set.add(record.video_id)
+            condition.add(('keyword__icontains', key), 'AND')
+        condition.add(('rating__lte', rating), 'AND')
+        records = KeywordVideoId.objects.select_related().filter(condition).distinct('video')
 
-                if len(period_set) > 0:
-                    SEARCH_CACHE[
-                        key] = period_set  # TODO: cache stragety is too simple and may result to memory issue in future
-            if result_set:
-                result_set = result_set.intersection(period_set)
-            else:
-                result_set = period_set
-
-        results = []
-        for video_id in result_set:
-            video = Video.objects.get(video_id=video_id)
-            if video is not None:
-                d = dict_for_video(video)
-                results.append(d)
+        results = [dict_for_video(item.video) for item in records]
         return results
-    except:
-        return []
+    except Exception as e:
+        log.error("Error searching result with keyword:{0} {1}".format(keys, e))
+        return QuerySet()
 
 
 # Suggest keyword to client. This view don't need csrf

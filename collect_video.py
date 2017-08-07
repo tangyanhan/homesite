@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-# coding=utf-8
+# coding=utf8
+# encoding: utf-8
 
 import sys
 import os
@@ -18,6 +19,7 @@ FLIP_DIR = './static/flip'
 FLIP_NUM = 16
 
 g_change_db = True
+g_gen_image = True
 
 VIDEO_RATING = None  # Default video rating for current collection
 
@@ -107,7 +109,7 @@ def save_dict_to_db(d):
     # Save dict to database
     for key in d:
         data = d[key]
-        log.info('#{0}# Count={1}'.format(key, data.count))
+        log.info("Keyword: {0} Count:{1}".format(key, data.count))
         for vid_id in data.files:
             log.info('\tvideo_id:{0}'.format(vid_id))
         if data.count > 0:
@@ -123,11 +125,12 @@ def save_dict_to_db(d):
                 kc.save()
 
             for vid_id in data.files:
-                files = KeywordVideoId.objects.filter(keyword=key, video_id=vid_id)
+                video = Video.objects.get(video_id=vid_id)
+                files = KeywordVideoId.objects.filter(keyword=key, video=video)
                 if not files:
                     kph = KeywordVideoId()
                     kph.keyword = key
-                    kph.video_id = vid_id
+                    kph.video = video
 
                     if g_change_db:
                         kph.save()
@@ -258,6 +261,8 @@ def gen_flips(video_path, video_id, duration, flip_path, flip_num):
     :param flip_num: number of flips to generate
     :return: True on success, False otherwise
     """
+    if not g_gen_image:
+        return True
     if not os.path.isdir(flip_path):
         os.mkdir(flip_path)
 
@@ -279,6 +284,8 @@ def gen_flips(video_path, video_id, duration, flip_path, flip_num):
 
 
 def gen_cover(video_path, cover_path):
+    if not g_gen_image:
+        return True
     if os.path.isfile(cover_path):
         os.remove(cover_path)
 
@@ -326,6 +333,8 @@ if __name__ == '__main__':
 ''')
         exit(0)
 
+    reload(sys)
+    sys.setdefaultencoding('utf8')
     # Import Django modules
     os.environ.update({"DJANGO_SETTINGS_MODULE": "homesite.settings"})
     import django
@@ -346,14 +355,18 @@ if __name__ == '__main__':
         for arg in sys.argv:
             if arg == 'nosave':
                 g_change_db = False
+            elif arg == 'noimage':
+                g_gen_image = False
             elif arg.startswith('rating='):
-                VIDEO_RATING = arg[len('rating='):]
-                rating_detail = [v for k, v in Video.RATING_CHOICES if k == VIDEO_RATING]
-                if rating_detail:
+                rating = arg[len('rating='):]
+                VIDEO_RATING = Video.RATING_MAP.get(rating, None)
+
+                if VIDEO_RATING is not None:
+                    rating_detail = [v for k, v in Video.RATING_CHOICES if k == VIDEO_RATING]
                     log.info("Movie rating: {0} {1}".format(VIDEO_RATING, rating_detail))
                 else:
                     log.error("Invalid rating option: {0}. Valid options are {1}".
-                              format(VIDEO_RATING, [k for k, v in Video.RATING_CHOICES]))
+                              format(rating, [k for k, v in Video.RATING_MAP.items()]))
                     sys.exit(1)
 
     keyword_file = 'keywords.blacklist'

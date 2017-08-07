@@ -7,9 +7,10 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 
+from custom_user.models import CustomUser
+
 from models import Video
 from models import KeywordVideoId
-from views import load_recent_records
 from views import dict_for_video
 
 MAX_RECOMMEND_NUM = 10
@@ -51,6 +52,10 @@ def rate(request):
 # Recommend videos in player page. So users can play at their own interest
 def recommend(request):
     try:
+        rating = Video.G
+        if isinstance(request.user, CustomUser):
+            rating = request.user.rating
+
         video_id = int(request.POST['id'])
         video = Video.objects.get(video_id=video_id)
 
@@ -83,7 +88,8 @@ def recommend(request):
                         video_list.append(dict_for_video(video))
             # Third, look for recently added
             if len(video_list) < MAX_RECOMMEND_NUM:
-                recent_records = load_recent_records()
+                records = Video.objects.filter(rating__lte=rating).order_by('-import_date')
+                recent_records = [dict_for_video(video) for video in records]
                 for record in recent_records:
                     if record['id'] not in check_set:
                         check_set.add(record['id'])
