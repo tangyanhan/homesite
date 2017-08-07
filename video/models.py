@@ -15,7 +15,6 @@ class Video(models.Model):
     dislike_count = models.PositiveIntegerField(default=0)
     watch_count = models.PositiveIntegerField(default=0)
     last_watch_date = models.DateField(null=True, default=None)  # Count in days
-    need_convert = models.BooleanField(default=False)
 
 
 class KeywordCount(models.Model):
