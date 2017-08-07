@@ -15,6 +15,9 @@ class Video(models.Model):
     dislike_count = models.PositiveIntegerField(default=0)
     watch_count = models.PositiveIntegerField(default=0)
     last_watch_date = models.DateField(null=True, default=None)  # Count in days
+    # Similar to American movie rating system.
+    # Audience age>rating is allowed to watch the movie
+    rating = models.IntegerField(default=17)
 
 
 class KeywordCount(models.Model):
