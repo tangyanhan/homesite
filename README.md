@@ -12,6 +12,9 @@ This project aims to create a media center site for home use.
 
 ## Kick Start
 
+0. ./manage.py migrate
+   Create database files
+
 1. ./collect_video [your dir containing mp4 videos]
    Your files will be retrieved recursively, all .mp4 files will be collected to database.
    Covers/thumbnails/flips(fake animated preview pictures) will be generated during this process,
