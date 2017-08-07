@@ -1,3 +1,6 @@
+# sqlite db
+db.sqlite3
+
 # static files
 .idea/
 static/thumb/*.png
