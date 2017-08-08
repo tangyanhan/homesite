@@ -1,12 +1,12 @@
+import mimetypes
+import os
+import re
+
+from wsgiref.util import FileWrapper
 from django.http import StreamingHttpResponse
 from django.shortcuts import render
 
 from models import Video
-
-from wsgiref.util import FileWrapper
-import mimetypes
-import os
-import re
 
 range_re = re.compile(r'bytes\s*=\s*(\d+)\s*-\s*(\d*)', re.I)
 

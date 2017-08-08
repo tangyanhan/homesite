@@ -1,3 +1,6 @@
+import os
+import re
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import permission_required
 from django.shortcuts import render
@@ -6,9 +9,6 @@ from django.http import HttpResponse
 
 from homesite.settings import config_dict
 from video.models import Video, KeywordCount
-
-import os
-import re
 
 RECORDS_PER_PAGE = 50
 

@@ -1,4 +1,3 @@
-import datetime
 import json
 import math
 import os
@@ -6,21 +5,21 @@ import re
 import sys
 import traceback
 
-from django.shortcuts import render
+from django.db.models import Q
+from django.db.models.query import QuerySet
+from django.http import Http404
 from django.http import HttpResponse
 from django.http import JsonResponse
-from django.http import Http404
+from django.shortcuts import render
 from django.shortcuts import render_to_response
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models.query import QuerySet
-from django.db.models import Q
-from models import Video
+
+from custom_user.models import CustomUser
+from models import KEYWORD_MAX_LENGTH
 from models import KeywordCount
 from models import KeywordVideoId
-from models import KEYWORD_MAX_LENGTH
-from custom_user.models import CustomUser
+from models import Video
 from util import log
-
 
 RECENT_DAYS = 7
 

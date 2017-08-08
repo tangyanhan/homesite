@@ -2,12 +2,11 @@
 # coding=utf8
 # encoding: utf-8
 
-import sys
 import os
-from subprocess import Popen, PIPE
 import re
+import sys
 import traceback
-
+from subprocess import Popen, PIPE
 
 KEYWORDS_BLACKLIST = []
 

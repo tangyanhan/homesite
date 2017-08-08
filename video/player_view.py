@@ -1,16 +1,15 @@
-import sys
 import re
+import sys
 import traceback
 
-from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
 
 from custom_user.models import CustomUser
-
-from models import Video
 from models import KeywordVideoId
+from models import Video
 from views import dict_for_video
 
 MAX_RECOMMEND_NUM = 10
