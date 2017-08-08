@@ -11,9 +11,24 @@
 	<script src="{% static 'js/create-table.js' %}"></script>
 	<script src="{% static 'js/video-thumb.js' %}"></script>
     <script>
-    	var table = "video"
+		function csrfSafeMethod(method) {
+			// these HTTP methods do not require CSRF protection
+			return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+		}
+
+    	var tableName = "video"
     	var pg = 0
+    	var dbUrl = "/manage/db/"
+    	var data = null
+    	var csrftoken = getCookie('csrftoken')
         $(document).ready( function(){
+        	$.ajaxSetup({
+				beforeSend: function(xhr, settings) {
+					if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+						xhr.setRequestHeader("X-CSRFToken", csrftoken);
+					}
+				}
+			});
 			$(".nav.nav-tabs>li>a").click(function(){
 				tableName = $(this).attr("name")
 				id = $(this).attr("href")
@@ -30,21 +45,105 @@
         	return element
         }
 
-		function loadDbTable(parent, tableName, pg) {
-			$.post("{% url 'manage:db' %}",{'table': tableName, 'pg':pg, 'csrfmiddlewaretoken': getCookie('csrftoken')},
+		function loadDbTable(parent, table, pg) {
+			$.get( dbUrl + table, {'pg':pg},
 			function(result,status){
 				if(status == "success"){
+					tableName = table
 					headers = result["headers"]
 					data = result["data"]
 
-					createTable(parent, headers, data, function(){}, function(rowIdx, colIdx, cell, cellData){
+					splitted = splitHeaders(headers)
+					cleanHeaders = splitted.headers
+					functions = splitted.functions
+					types = splitted.types
+					createTable(parent, cleanHeaders, data, function(){}, function(rowIdx, colIdx, cell, cellData){
 						if( colIdx == 2 ) {
 							cell.innerHTML = durationStringFromSeconds(cellData)
+						}
+						func = functions[colIdx]
+						if( func ) {
+							cell.innerHTML = ""
+							input = func(cell, cellData, types[colIdx]);
+							key = data[rowIdx][0]
+							input.onchange = function() {
+								updateCellInput(this, cleanHeaders[colIdx], cellData, key)
+							}
 						}
 					})
 				}
 			}
 			);
+		}
+
+		// Strip format specifiers in header
+		function splitHeaders(headers) {
+			newHeaders = new Array()
+			functions = new Array()
+			types = new Array()
+			var pattern = /(.*)\[(.*)\]/
+			for( var i=0; i<headers.length; i++ ) {
+				field = headers[i]
+				var match = pattern.exec(field)
+				var type = ""
+				func = null
+				if(match) {
+					field = match[1]
+					type = match[2]
+					var optionPattern = /options\((.*)\)/
+					match = optionPattern.exec(type)
+					choices = ""
+					if( match ) {
+						options = match[1].split("|")
+						func = function(cell, cellData, type){
+							select = document.createElement("select")
+							for(var iOption=0; iOption<options.length; iOption++) {
+								option = document.createElement("option")
+								option.value = iOption
+								option.innerHTML = options[iOption]
+								if(cellData == iOption) {
+									option.setAttribute("selected", "selected")
+								}
+								select.append(option)
+							}
+							cell.append(select)
+							return select
+						}
+					}else{
+						func = function(cell, cellData, type) {
+							input = document.createElement("input")
+							input.type = type
+							input.value = cellData
+							cell.append(input)
+							return input
+						}
+					}
+
+				}
+				types.push(type)
+				newHeaders.push(field)
+				functions.push(func)
+			}
+			return {
+				'types': types,
+				'headers': newHeaders,
+				'functions': functions
+			}
+		}
+
+		function updateCellInput(input, field, oldValue, key) {
+			$.ajax({
+				url: dbUrl + tableName + "/",   // Append back slash for put request
+				type: "PUT",
+				data: {"key": key, "field": field, "field-value": input.value},
+				success: function(result) {
+					input.style.backgroundColor = "#b3ffb3";
+				},
+				error: function(event, XMLHttpRequest, ajaxOptions, thrownError) {
+					input.style.backgroundColor = "#ffad99";
+					input.value = oldValue
+				}
+			});
 		}
     </script>
 </head>

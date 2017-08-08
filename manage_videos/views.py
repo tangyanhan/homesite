@@ -1,14 +1,17 @@
+import json
 import os
 import re
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import permission_required
+from django.db.models import Q
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.http import HttpResponse
+from django.http import QueryDict
 
 from homesite.settings import config_dict
-from video.models import Video, KeywordCount
+from video.models import Video, KeywordCount, KeywordVideoId
 
 RECORDS_PER_PAGE = 50
 
@@ -25,7 +28,7 @@ def import_videos(request):
     return render(request, 'import-videos.html')
 
 
-@permission_required('video.add_video')
+@permission_required('video.add_video, video.change_video')
 def load_dir(request):
     dir = request.POST['dir']
 
@@ -75,26 +78,60 @@ def load_dir(request):
 
 
 @permission_required('video.change_video')
-def db(request):
-    table = request.POST['table']
-    page = int(request.POST['pg'])
+def db(request, table):
+    if request.method == 'GET':
+        page = int(request.GET['pg'])
 
-    table_headers = []
-    data = []
-    if table == 'video':
-        table_headers = ['ID', 'Title', 'Duration', 'Like', 'Dislike', 'Path']
-        page_start = page * RECORDS_PER_PAGE
-        page_end = (page + 1) * RECORDS_PER_PAGE
-        videos = Video.objects.all()[page_start: page_end]
-        for v in videos:
-            data.append([v.video_id, v.title, v.duration, v.like_count, v.dislike_count, v.path])
-    elif table == 'keywords':
-        table_headers = ['Keyword', 'Count']
-        page_start = page * RECORDS_PER_PAGE
-        page_end = (page + 1) * RECORDS_PER_PAGE
-        keywords = KeywordCount.objects.all()[page_start: page_end]
-        for k in keywords:
-            data.append([k.keyword, k.count])
+        table_headers = []
+        data = []
+        if table == 'video':
+            rating_header = 'rating[options(' + '|'.join([v for k, v in Video.RATING_CHOICES]) + ')]'
+            table_headers = ['video_id', 'title[text]', 'duration',
+                             'like_count[number]', 'dislike_count[number]',
+                             'path',
+                             rating_header]
+            page_start = page * RECORDS_PER_PAGE
+            page_end = (page + 1) * RECORDS_PER_PAGE
+            videos = Video.objects.all()[page_start: page_end]
+            for v in videos:
+                data.append([v.video_id, v.title, v.duration, v.like_count, v.dislike_count, v.path, v.rating])
+        elif table == 'keywords':
+            table_headers = ['keyword', 'count']
+            page_start = page * RECORDS_PER_PAGE
+            page_end = (page + 1) * RECORDS_PER_PAGE
+            keywords = KeywordCount.objects.all()[page_start: page_end]
+            for k in keywords:
+                data.append([k.keyword, k.count])
 
-    return JsonResponse({'headers': table_headers, 'data':data})
+        return JsonResponse({'headers': table_headers, 'data':data})
+    elif request.method == 'PUT':
+        put = QueryDict(request.body)
+        key = put.get('key')
+        field = put.get('field')
+        field_value = put.get('field-value')
+        record = None
+        if table == 'video':
+            record = Video.objects.get(video_id=key)
+        elif table == 'keywords':
+            record = KeywordCount.objects.get(keyword=key)
+        record.__setattr__(field, field_value)
+        record.save()
 
+        return HttpResponse('', status=200)
+    elif request.method == 'DELETE':
+        delete = QueryDict(request.body)
+        keys = delete.get('keys')
+        keys = keys.split(',')
+        field = ''
+        if table == 'video':
+            field = 'video_id'
+        elif table == 'keywords':
+            field = 'keyword'
+        condition = Q()
+        for key in keys:
+            condition.add((field, key), 'OR')
+        if table == 'video':
+            Video.objects.filter(condition).delete()
+        elif table == 'keywords':
+            KeywordCount.objects.filter(condition).delete()
+            KeywordVideoId.objects.filter(condition).delete()
