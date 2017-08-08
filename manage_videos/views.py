@@ -1,24 +1,31 @@
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import permission_required
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.http import HttpResponse
+
 from homesite.settings import config_dict
 from video.models import Video, KeywordCount
 
-import json
 import os
 import re
 
 RECORDS_PER_PAGE = 50
 
 # Create your views here.
+@login_required
+@permission_required('video.delete_video')
 def index(request):
     return render(request, 'manage-videos.html')
 
 
+@login_required
+@permission_required('video.add_video')
 def import_videos(request):
     return render(request, 'import-videos.html')
 
 
+@permission_required('video.add_video')
 def load_dir(request):
     dir = request.POST['dir']
 
@@ -67,6 +74,7 @@ def load_dir(request):
     return JsonResponse({'headers': headers, 'data': entry_list, 'current_dir': current_dir})
 
 
+@permission_required('video.change_video')
 def db(request):
     table = request.POST['table']
     page = int(request.POST['pg'])
