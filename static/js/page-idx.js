@@ -1,5 +1,9 @@
 // func(a, idx), to customize the <a> element inside pagination
 function createPagination(parent, current, total, func){
+    if(total < 2) {
+        return
+    }
+
     ul = document.createElement("ul");
     ul.classList.add("pagination");
 
