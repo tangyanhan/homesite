@@ -47,7 +47,6 @@
 			<div class="collapse navbar-collapse" id="navbar-collapse">
 				<ul class="nav navbar-nav navbar-right" id="nav-list">
 					<li class="active"><a href="{% url 'video-index' %}">Videos</a></li>
-					<li><a href="{% url 'live-index' %}">Live</a></li>
 					{% if request.user.is_superuser %}
 					<li><a href="{% url 'manage:index' %}">Manage</a></li>
 					<li><a href="{% url 'manage:import' %}">Import</a></li>

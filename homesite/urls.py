@@ -24,7 +24,6 @@ import settings
 from video import video_stream
 from video import views as video_views
 from video import player_view
-from live import views as live_views
 
 import https.views as https_views
 
@@ -37,9 +36,6 @@ urlpatterns = [
                   url(r'^stream/([a-f0-9]+)$', video_stream.stream, name='stream'),
                   url(r'^search.*$', video_views.videos, name='search'),
                   url(r'^suggest/$', video_views.keyword_suggest, name='keyword_suggest'),
-                  url(r'^live-post/(\d+)$', live_views.post, name='live-post'),
-                  url(r'^live/(\d+)$', live_views.live, name='live'),
-                  url(r'^live/$', live_views.index, name='live-index'),
                   url(r'^admin/', admin.site.urls, name='admin'),
                   url(r'^manage/', include('manage_videos.urls', namespace='manage')),
                   url(r'^accounts/login/$', auth_views.login, {'template_name': 'login.html'}),
