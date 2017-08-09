@@ -16,6 +16,7 @@
 			return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 		}
 
+		var currentParentSelector = "#video>.panel-body"
     	var tableName = "video"
     	var pg = 0
     	var dbUrl = "/manage/db/"
@@ -35,10 +36,11 @@
 				tableName = $(this).attr("name")
 				id = $(this).attr("href")
 				id = id + ">.panel-body"
-				loadDbTable($(id), tableName, 0)
+				currentParentSelector = id
+				loadDbTable($(currentParentSelector), tableName, 0)
 			});
 
-			loadDbTable($("#video>.panel-body"), "video", 0)
+			loadDbTable($(currentParentSelector), "video", 0)
         })
 
         function createCheckboxElement(type) {
@@ -164,7 +166,7 @@
 				type: "DELETE",
 				data: {"keys": keys.join()},
 				success: function(result) {
-					loadDbTable($("#video>.panel-body"), tableName, pg)  // Reload current page
+					loadDbTable($(currentParentSelector), tableName, pg)  // Reload current page
 					$("#hint strong").text("Items deleted successfully");
 					$("#hint").addClass("alert-success");
 					$("#hint").show();
