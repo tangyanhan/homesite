@@ -41,7 +41,7 @@ function showSuggestionList(keywords) {
     for (var i = keywords.length - 1; i >= 0; i--) {
         li = document.createElement("li")
             a = document.createElement("a")
-            a.href = getLocation(keywords[i],0)
+            a.href = getKeywordUrl(keywords[i],0)
             a.innerHTML = keywords[i]
             li.append(a)
         ul.append(li)
@@ -89,7 +89,7 @@ function search(keyword) {
     $("#keyword_input").blur()
     $("#sug-list").hide()
 
-	window.location.href = getLocation(keyword, 0)
+	window.location.href = getKeywordUrl(keyword, 0)
 }
 
 function processKeyword(keyword){
@@ -100,8 +100,8 @@ function processKeyword(keyword){
     return keyword
 }
 
-function getLocation(keyword, pageIndex) {
-	return "{% url 'search' %}" + "?&keyword=" + keyword + "&idx=" + pageIndex
+function getKeywordUrl(keyword, pageIndex) {
+	return "/search/?&keyword=" + keyword + "&idx=" + pageIndex
 }
 
 function getCookie(c_name)
@@ -214,17 +214,5 @@ function loadSearchPage(keyword, pageIndex, pageNum, results) {
         li = createThumbFromVideo(video)
         videoDiv.append(li)
     }
-
-	//recreate page index if necessary
-	updatePageIndex(pageIndex, pageNum, keyword, getLocation)
-
-	$("pagination-summary").innerHTML = ""
-	if( results.length > 0 ) {
-	    if( keyword.length > 0 ) {
-	        $("pagination-summary").innerHTML = "Showing " + results.length + " results on page " + (pageIndex + 1) + " of " + pageNum + "using keyword:" + keyword
-	    }else{
-	        $("pagination-summary").innerHTML = "Showing " + results.length + " results on page " + (pageIndex + 1) + " of " + pageNum
-	    }
-	}
 }
 

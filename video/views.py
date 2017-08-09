@@ -66,7 +66,7 @@ def videos(request):
                 'results': json.dumps([])}
                           )
 
-        page_num = math.ceil(1.0 * len(results) / RESULT_NUM_PER_PAGE)
+        page_num = int(math.ceil(1.0 * len(results) / RESULT_NUM_PER_PAGE))
 
         if idx >= page_num:
             raise Http404

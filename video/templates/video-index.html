@@ -6,16 +6,34 @@
 	<script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
 	<link rel="stylesheet" type="text/css" href="{% static 'css/video-thumb.css' %}">
 	<script type="text/javascript" src="{% static 'js/video-thumb.js' %}"></script>
-	<script type="text/javascript" src="{% static 'js/pageidx.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/page-idx.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/search-bar.js' %}"></script>
 	<script>
+		var keyword = "{{ keyword }}";
+		var idx = {{ idx }};
+		var pageNum = {{ page_num }};
+		results = {{ results|safe }};
+
 		$(document).ready( function(){
-		    var keyword = "{{ keyword }}";
-			var pageIndex = {{ idx }};
-			var pageNum = {{ page_num }};
-			results = {{ results|safe }};
-			loadSearchPage(keyword, pageIndex, pageNum, results);
+			loadSearchPage(keyword, idx, pageNum, results);
+			updateSummary(keyword, idx, pageNum, results);
+			createPagination($("#pages"), idx, pageNum, setupPageIndex)
 		});
+
+		function updateSummary(keyword, pageIndex, pageNum, results) {
+			$("pagination-summary").innerHTML = ""
+			if( results.length > 0 ) {
+				if( keyword.length > 0 ) {
+					$("pagination-summary").innerHTML = "Showing " + results.length + " results on page " + (pageIndex + 1) + " of " + pageNum + "using keyword:" + keyword
+				}else{
+					$("pagination-summary").innerHTML = "Showing " + results.length + " results on page " + (pageIndex + 1) + " of " + pageNum
+				}
+			}
+		}
+
+		function setupPageIndex(a, idx) {
+			a.href = getKeywordUrl(keyword, idx)
+		}
 
 	</script>
 	<style>
@@ -44,8 +62,7 @@
 	<h2 id="empty-hint"></h2>
 	<ul class="row" id="videos"></ul>
 
-	<nav class="" aria-label="Page navigation">
-		<ul id="pages" class="pagination"></ul>
+	<nav id="pages" class="" aria-label="Page navigation">
 	</nav>
 </div>
 

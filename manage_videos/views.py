@@ -1,4 +1,4 @@
-import json
+import math
 import os
 import re
 
@@ -13,7 +13,7 @@ from django.http import QueryDict
 from homesite.settings import config_dict
 from video.models import Video, KeywordCount, KeywordVideoId
 
-RECORDS_PER_PAGE = 50
+RECORDS_PER_PAGE = 20
 
 # Create your views here.
 @login_required
@@ -84,6 +84,7 @@ def db(request, table):
 
         table_headers = []
         data = []
+        page_num = 1
         if table == 'video':
             rating_header = 'rating[options(' + '|'.join([v for k, v in Video.RATING_CHOICES]) + ')]'
             table_headers = ['video_id', 'title[text]', 'duration',
@@ -92,6 +93,7 @@ def db(request, table):
                              rating_header]
             page_start = page * RECORDS_PER_PAGE
             page_end = (page + 1) * RECORDS_PER_PAGE
+            page_num = math.ceil(Video.objects.all().count() * 1.0 / RECORDS_PER_PAGE)
             videos = Video.objects.all()[page_start: page_end]
             for v in videos:
                 data.append([v.video_id, v.title, v.duration, v.like_count, v.dislike_count, v.path, v.rating])
@@ -99,11 +101,12 @@ def db(request, table):
             table_headers = ['keyword', 'count']
             page_start = page * RECORDS_PER_PAGE
             page_end = (page + 1) * RECORDS_PER_PAGE
+            page_num = math.ceil(KeywordCount.objects.all().count() * 1.0 / RECORDS_PER_PAGE)
             keywords = KeywordCount.objects.all()[page_start: page_end]
             for k in keywords:
                 data.append([k.keyword, k.count])
 
-        return JsonResponse({'headers': table_headers, 'data':data})
+        return JsonResponse({'headers': table_headers, 'data':data, 'page-num': page_num})
     elif request.method == 'PUT':
         put = QueryDict(request.body)
         key = put.get('key')
