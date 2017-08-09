@@ -22,6 +22,8 @@
     	var data = null
     	var csrftoken = getCookie('csrftoken')
         $(document).ready( function(){
+        	$("#hint").hide();
+
         	$.ajaxSetup({
 				beforeSend: function(xhr, settings) {
 					if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
@@ -145,13 +147,44 @@
 				}
 			});
 		}
+
+		function deleteSelectedItems() {
+			var keys = new Array()
+			$("tbody tr th input[type=checkbox]:checked").each(function(){
+				rowIdx = $(this).parent().parent().index();
+				keys.push(data[rowIdx][0])
+			});
+			console.log("keys:"+keys.join());
+
+			$("#hint").removeClass("alert-success");
+			$("#hint").removeClass("alert-danger");
+
+			$.ajax({
+				url: dbUrl + tableName + "/",   // Append back slash for put request
+				type: "DELETE",
+				data: {"keys": keys.join()},
+				success: function(result) {
+					loadDbTable($("#video>.panel-body"), tableName, pg)  // Reload current page
+					$("#hint strong").text("Items deleted successfully");
+					$("#hint").addClass("alert-success");
+					$("#hint").show();
+				},
+				error: function(event, XMLHttpRequest, ajaxOptions, thrownError) {
+					$("#hint strong").text(thrownError);
+					$("#hint").addClass("alert-danger");
+					$("#hint").show();
+				}
+			});
+		}
     </script>
 </head>
 <body>
+
 {% include 'nav.html' %}
 
 <!-- Tab -->
 <div class="container">
+
 	<ul class="nav nav-tabs">
 		<li class="active">
 			<a href="#video" name="video" data-toggle="tab">
@@ -168,9 +201,39 @@
 		<div class="panel-body"></div>
 	</div>
 	<div class="panel-footer clearfix">
-		<div class="pull-right">
-			<a href="#" class="btn btn-danger">Delete</a>
+				<!-- hint alert -->
+		<div id="hint" class="alert">
+		<a href="#" class="close" data-dismiss="alert">
+			&times;
+		</a>
+		<strong></strong>
 		</div>
+		<!-- End hint alert -->
+		<div class="pull-right">
+			<button class="btn btn-danger" data-toggle="modal" data-target="#delete-modal">Delete</button>
+			<!-- delete-modal -->
+			<div id="delete-modal" class="modal fade" tabindex="-1" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+					  <div class="modal-header">
+						<a class="close" data-dismiss="modal">×</a>
+						<h3>Delete confirmation</h3>
+						</div>
+						<div class="modal-body">
+						  <h4>Are you sure deleting these items?</h4>
+						  <p>These items will be deleted from database.<br>
+							  If you want to recover them, you have to import again</p>
+						</div>
+						<div class="modal-footer">
+						  <button class="btn btn-danger" onclick="deleteSelectedItems()" data-dismiss="modal">DELETE</button>
+						  <a href="#" class="btn btn-default" data-dismiss="modal">Close</a>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- End delete-modal -->
+		</div>
+	</div>
 	</div>
 </div>
 <!-- Tab End -->

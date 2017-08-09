@@ -135,3 +135,4 @@ def db(request, table):
         elif table == 'keywords':
             KeywordCount.objects.filter(condition).delete()
             KeywordVideoId.objects.filter(condition).delete()
+        return HttpResponse('Record removed', status=204)
