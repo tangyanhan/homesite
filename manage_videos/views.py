@@ -12,6 +12,7 @@ from django.http import QueryDict
 
 from homesite.settings import config_dict
 from video.models import Video, KeywordCount, KeywordVideoId
+from custom_user.models import CustomUser
 
 RECORDS_PER_PAGE = 20
 
@@ -105,6 +106,13 @@ def db(request, table):
             keywords = KeywordCount.objects.all()[page_start: page_end]
             for k in keywords:
                 data.append([k.keyword, k.count])
+        elif table == 'user_rating':
+            rating_header = 'rating[options(' + '|'.join([v for k, v in Video.RATING_CHOICES]) + ')]'
+            table_headers = ['username', rating_header]
+            users = CustomUser.objects.all()
+            page_num = 1
+            for u in users:
+                data.append([u.username, u.rating])
 
         return JsonResponse({'headers': table_headers, 'data':data, 'page-num': page_num})
     elif request.method == 'PUT':
@@ -117,6 +125,8 @@ def db(request, table):
             record = Video.objects.get(video_id=key)
         elif table == 'keywords':
             record = KeywordCount.objects.get(keyword=key)
+        elif table == 'user_rating':
+            record = CustomUser.objects.get(username=key)
         record.__setattr__(field, field_value)
         record.save()
 
@@ -138,4 +148,7 @@ def db(request, table):
         elif table == 'keywords':
             KeywordCount.objects.filter(condition).delete()
             KeywordVideoId.objects.filter(condition).delete()
+        elif table == 'user_rating':
+            CustomUser.objects.filter(condition).delete()
+
         return HttpResponse('Record removed', status=204)
