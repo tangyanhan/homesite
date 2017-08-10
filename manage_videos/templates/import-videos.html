@@ -10,10 +10,53 @@
 	<script src="{% static 'js/search-bar.js' %}"></script>
 	<script src="{% static 'js/create-table.js' %}"></script>
 	<script>
+		function csrfSafeMethod(method) {
+			// these HTTP methods do not require CSRF protection
+			return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+		}
+
+    	var csrftoken = getCookie('csrftoken')
 		var currentDir = ""
+		var data = null
+		var functions = null
 		$(document).ready(function(){
 			loadDirTable("")
+			$.ajaxSetup({
+				beforeSend: function(xhr, settings) {
+					if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+						xhr.setRequestHeader("X-CSRFToken", csrftoken);
+					}
+				}
+			});
+			$("#import-dir").click(function(){
+				var pathArr = new Array()
+				$("tbody tr th input[type=checkbox]:checked").each(function(){
+					row = $(this).parent().parent().index();
+					path = currentDir + data[row][0]
+					rating = data[row][2]
+					pathArr.push([path, rating])
+				});
+
+				if( pathArr.length ) {
+					importPaths(pathArr)
+				}
+			});
+			updateStatus();
 		})
+
+		function importPaths(pathArr) {
+			$.ajax({
+				url: "{% url 'manage:import-dir' %}",   // Append back slash for put request
+				type: "PUT",
+				data: JSON.stringify({"path-list": pathArr}),
+				success: function(result) {
+					console.log(result)
+				},
+				error: function(event, XMLHttpRequest, ajaxOptions, thrownError) {
+					console.log("Errors" + event + thrownError)
+				}
+			});
+		}
 
 		function customizeRow(row, rowIdx, rowData) {
 			if(rowData[1]) { // is dir
@@ -34,6 +77,16 @@
 				cell.innerHTML = cellData? "DIR" : "File"
 				break
 			}
+
+			func = functions[colIdx]
+			if( colIdx == 2 ) {
+				cell.innerHTML = ""
+				input = func(cell, cellData, types[colIdx]);
+				key = data[rowIdx][0]
+				input.onchange = function() {
+					updateRating(this, rowIdx, colIdx)
+				}
+			}
 		}
 
 		function stringEndsWith(str,c) {
@@ -46,23 +99,30 @@
         	if(dir.charAt(0) == '/') {
         		dir = dir.substr(1)
         	}
-            $.post("{% url 'manage:dir' %}", { 'dir':dir, 'csrfmiddlewaretoken': getCookie('csrftoken')},
+            $.post("{% url 'manage:import-dir' %}", {'dir': dir, 'csrfmiddlewaretoken': csrftoken},
                 function(result,status){
                 	if(status == "success"){
                 		currentDir = result['current_dir']
 						if( currentDir.length > 0 && currentDir[currentDir.length-1] != '/' ) {
 							currentDir += '/'
 						}
-
 						createDirTitle(dir)
-						//$(".panel-title").text(currentDir)
 
 						var headers = result['headers']
-						var data = result['data']
-						createTable($(".panel-body"), headers, data, customizeRow, customizeCell)
+						data = result['data']
+
+						splitted = splitHeaders(headers)
+						cleanHeaders = splitted.headers
+						functions = splitted.functions
+						types = splitted.types
+						createTable($(".panel-body"), cleanHeaders, data, customizeRow, customizeCell)
                 	}
                 }
             );
+        }
+
+        function updateRating(input, row, col) {
+			data[row][col] = input.value
         }
 
         function createDirTitle(dir) {
@@ -92,10 +152,36 @@
         	}
         }
 
+        function updateStatus() {
+			$.post("{% url 'manage:import-status' %}", {'csrfmiddlewaretoken': csrftoken},
+                function(data,status){
+                	if(status == "success"){
+                		var importNum = data["import-num"]
+                		var taskNum = data["task-num"]
+
+						status = importNum>0 ? importNum + " importing thread running " : "No import thread running"
+						if( taskNum > 0 ) {
+							status += ". Tasks in queue:" + taskNum
+						}
+						$("#status").removeClass("alert-warning")
+						$("#status").removeClass("alert-success")
+
+						$("#status").addClass( importNum>0 ? "alert-warning" : "alert-success" )
+						$("#status strong").text(status)
+						setTimeout(updateStatus, 1000) //Update every second
+                	}
+                }
+            );
+        }
+
 	</script>
 </head>
 <body>
 {% include 'nav.html' %}
+
+<div id="status" class="alert container">
+	<strong></strong>
+</div>
 
 <div class="container panel panel-default">
   <div class="panel-heading"><h2 class="panel-title"></h2></div>
@@ -104,7 +190,7 @@
   </div>
 		<div class="panel-footer clearfix">
 		<div class="pull-right">
-			<button id="import_dir" class="btn btn-primary">Import</button>
+			<button id="import-dir" class="btn btn-primary">Import</button>
 		</div>
 	</div>
 </div>

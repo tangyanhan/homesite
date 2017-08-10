@@ -1,6 +1,9 @@
+import json
 import math
 import os
 import re
+from threading import Thread
+from Queue import Queue
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import permission_required
@@ -11,10 +14,14 @@ from django.http import HttpResponse
 from django.http import QueryDict
 
 from homesite.settings import config_dict
-from video.models import Video, KeywordCount, KeywordVideoId
+from video.models import Video, KeywordVideoId
+from video.views import get_keyword_count_list
 from custom_user.models import CustomUser
+from .import_videos import create_task_list, start_tasks, add_keywords_to_db, task_queue
 
 RECORDS_PER_PAGE = 20
+
+IMPORT_THREAD_QUEUE = Queue()
 
 # Create your views here.
 @login_required
@@ -25,13 +32,51 @@ def index(request):
 
 @login_required
 @permission_required('video.add_video')
-def import_videos(request):
+def import_index(request):
     return render(request, 'import-videos.html')
 
 
 @permission_required('video.add_video, video.change_video')
-def load_dir(request):
-    dir = request.POST['dir']
+def import_dir(request):
+    if request.method == 'POST':
+        dir = request.POST['dir']
+        return load_dir(dir)
+    elif request.method == 'PUT':
+        put = json.loads(request.body)
+        relative_path_list = put.get('path-list')
+        root = config_dict.get('load_dir_root', os.getenv('HOME'))
+
+        path_list = []
+        for (path, rating) in relative_path_list:
+            path = os.path.join(root, path)
+            rating = int(rating)
+            path_list.append((path, rating))
+
+        print '#path-list#', path_list
+        task_list = create_task_list(path_list)
+        if not task_list:
+            return HttpResponse('No videos to be imported', status=304)
+
+        t = Thread(target=import_tasks_thread_worker, kwargs={'task_list': task_list})
+        t.name = 'web-import'
+        t.daemon = False
+        t.start()
+        IMPORT_THREAD_QUEUE.put(t)
+
+        return HttpResponse("{0} videos to be imported".format(len(task_list)), status=200)
+
+
+def import_status(request):
+    return JsonResponse({'import-num': IMPORT_THREAD_QUEUE.qsize(), 'task-num': task_queue.qsize()})
+
+
+def import_tasks_thread_worker(task_list):
+    start_tasks(task_list)
+    add_keywords_to_db(task_list)
+    IMPORT_THREAD_QUEUE.get()
+
+
+def load_dir(dir):
 
     if len(dir) > 512:
         return HttpResponse('Dir too long', status=400)
@@ -66,12 +111,13 @@ def load_dir(request):
         entry = os.path.join(path, fn)
 
         if os.path.isdir(entry):
-            dir_list.append([fn, True])
+            dir_list.append([fn, True, Video.P])
         elif fn.endswith('.mp4'):
-            file_list.append([fn, False])
+            file_list.append([fn, False, Video.P])
     entry_list = dir_list + file_list
 
-    headers = ['Path', 'Type']
+    rating_header = 'Rating[options(' + '|'.join([v for k, v in Video.RATING_CHOICES]) + ')]'
+    headers = ['Path', 'Type', rating_header]
     current_dir = path[len(root):]
     return JsonResponse({'headers': headers, 'data': entry_list, 'current_dir': current_dir})
 
@@ -97,13 +143,13 @@ def db(request, table):
             for v in videos:
                 data.append([v.video_id, v.title, v.duration, v.like_count, v.dislike_count, v.path, v.rating])
         elif table == 'keywords':
-            table_headers = ['keyword', 'count']
+            table_headers = ['keyword[text]', 'video_id', 'title', 'rating']
             page_start = page * RECORDS_PER_PAGE
             page_end = (page + 1) * RECORDS_PER_PAGE
-            page_num = math.ceil(KeywordCount.objects.all().count() * 1.0 / RECORDS_PER_PAGE)
-            keywords = KeywordCount.objects.all()[page_start: page_end]
+            page_num = math.ceil(KeywordVideoId.objects.all().count() * 1.0 / RECORDS_PER_PAGE)
+            keywords = KeywordVideoId.objects.all()[page_start: page_end]
             for k in keywords:
-                data.append([k.keyword, k.count])
+                data.append([k.keyword, k.video.video_id, k.video.title, k.video.rating])
         elif table == 'user_rating':
             rating_header = 'rating[options(' + '|'.join([v for k, v in Video.RATING_CHOICES]) + ')]'
             table_headers = ['username', rating_header]
@@ -122,7 +168,8 @@ def db(request, table):
         if table == 'video':
             record = Video.objects.get(video_id=key)
         elif table == 'keywords':
-            record = KeywordCount.objects.get(keyword=key)
+            record = KeywordVideoId.objects.get(keyword=key)
+            get_keyword_count_list(recreate=True)
         elif table == 'user_rating':
             record = CustomUser.objects.get(username=key)
         record.__setattr__(field, field_value)
@@ -144,7 +191,6 @@ def db(request, table):
         if table == 'video':
             Video.objects.filter(condition).delete()
         elif table == 'keywords':
-            KeywordCount.objects.filter(condition).delete()
             KeywordVideoId.objects.filter(condition).delete()
         elif table == 'user_rating':
             CustomUser.objects.filter(condition).delete()

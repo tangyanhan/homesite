@@ -42,11 +42,6 @@ class Video(models.Model):
     rating = models.PositiveIntegerField(choices=RATING_CHOICES, default=P)
 
 
-class KeywordCount(models.Model):
-    keyword = models.CharField(primary_key=True, null=False, max_length=KEYWORD_MAX_LENGTH)
-    count = models.PositiveIntegerField(default=0)
-
-
 class KeywordVideoId(models.Model):
     keyword = models.CharField(null=False, max_length=KEYWORD_MAX_LENGTH)
     video = models.ForeignKey(Video)

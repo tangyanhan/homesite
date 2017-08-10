@@ -12,7 +12,7 @@
 		$(document).ready( function(){
 			setupThumbListener()
 			setupFlipListener()
-			setupSearchBarListener()
+			setupSearchBarListener("{% url 'keyword_suggest' %}")
 
 			// Update nav link of current page to primary
 		    $("#nav-list li a").each(function(){

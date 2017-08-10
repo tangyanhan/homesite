@@ -90,61 +90,6 @@
 			);
 		}
 
-		// Strip format specifiers in header
-		function splitHeaders(headers) {
-			newHeaders = new Array()
-			functions = new Array()
-			types = new Array()
-			var pattern = /(.*)\[(.*)\]/
-			for( var i=0; i<headers.length; i++ ) {
-				field = headers[i]
-				var match = pattern.exec(field)
-				var type = ""
-				func = null
-				if(match) {
-					field = match[1]
-					type = match[2]
-					var optionPattern = /options\((.*)\)/
-					match = optionPattern.exec(type)
-					choices = ""
-					if( match ) {
-						options = match[1].split("|")
-						func = function(cell, cellData, type){
-							select = document.createElement("select")
-							for(var iOption=0; iOption<options.length; iOption++) {
-								option = document.createElement("option")
-								option.value = iOption
-								option.innerHTML = options[iOption]
-								if(cellData == iOption) {
-									option.setAttribute("selected", "selected")
-								}
-								select.append(option)
-							}
-							cell.append(select)
-							return select
-						}
-					}else{
-						func = function(cell, cellData, type) {
-							input = document.createElement("input")
-							input.type = type
-							input.value = cellData
-							cell.append(input)
-							return input
-						}
-					}
-
-				}
-				types.push(type)
-				newHeaders.push(field)
-				functions.push(func)
-			}
-			return {
-				'types': types,
-				'headers': newHeaders,
-				'functions': functions
-			}
-		}
-
 		function updateCellInput(input, field, oldValue, key) {
 			$.ajax({
 				url: dbUrl + tableName + "/",   // Append back slash for put request

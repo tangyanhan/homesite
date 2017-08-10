@@ -1,4 +1,8 @@
-function setupSearchBarListener() {
+var suggestUrl = "/suggest/"
+
+function setupSearchBarListener(sugUrl) {
+    suggestUrl = sugUrl
+
     $("#sug-list").hide()
     $("#search_button").click(function(){
       search( $("#keyword_input").val() )
@@ -41,8 +45,11 @@ function showSuggestionList(keywords) {
     for (var i = keywords.length - 1; i >= 0; i--) {
         li = document.createElement("li")
             a = document.createElement("a")
-            a.href = getKeywordUrl(keywords[i],0)
-            a.innerHTML = keywords[i]
+            keyword = keywords[i][0]
+            count = keywords[i][1]
+            a.href = getKeywordUrl(keyword,0)
+
+            a.innerHTML = keyword + "   <span class=\"pull-right\">" + count + (count>1?" results":" result") + "</span>"
             li.append(a)
         ul.append(li)
     }
@@ -62,7 +69,7 @@ function showSuggestion() {
             showSuggestionList(keywords)
         }
     }else{
-		$.post("{% url 'keyword_suggest' %}", { 'keyword':keyword, 'csrfmiddlewaretoken': getCookie('csrftoken')},
+		$.post(suggestUrl, { 'keyword':keyword, 'csrfmiddlewaretoken': getCookie('csrftoken')},
 			function(data,status){
 			if(status == "success"){
 				var keywords = data['keywords']

@@ -65,6 +65,9 @@ This project aims to create a media center site for home use.
 ![manage_2](http://wx2.sinaimg.cn/large/83e56decgy1fidixa4v9qj215y0fswja.jpg)
 ![manage_3](http://wx3.sinaimg.cn/large/83e56decgy1fidix7nicdj20xm0b0wfo.jpg)
 
+### Import Page
+![import_1](http://wx2.sinaimg.cn/large/83e56decgy1fifusadx9wj219t0nv79h.jpg)
+
 ### Movie Rating System
 
 ![movie_rating](http://wx2.sinaimg.cn/large/83e56decgy1fidix6tp5ej20zj0n1n2v.jpg)

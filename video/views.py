@@ -5,6 +5,7 @@ import re
 import sys
 import traceback
 
+from django.db import connection
 from django.db.models import Q
 from django.db.models.query import QuerySet
 from django.http import Http404
@@ -16,16 +17,40 @@ from django.views.decorators.csrf import csrf_exempt
 
 from custom_user.models import CustomUser
 from models import KEYWORD_MAX_LENGTH
-from models import KeywordCount
 from models import KeywordVideoId
 from models import Video
-from util import log
 
 RECENT_DAYS = 7
 
 MAX_KEYWORD_LEN = 50
 
 RESULT_NUM_PER_PAGE = 40  # Make it float to avoid bad results from ceil when calculating total page num
+
+KEYWORD_COUNT_LIST = None
+
+
+def get_keyword_count_list(recreate=False):
+    """
+    Get a list of (keyword, count) tuple, ordered by count in descending way.
+    If it does not exist, we will create it using a complicate sql.
+    :param recreate: Recreate the list even if it already exists.
+    :return: A list of (keyword, count), descending order by count.
+    """
+    global KEYWORD_COUNT_LIST
+    if not KEYWORD_COUNT_LIST or recreate:
+        KEYWORD_COUNT_LIST = []
+        cursor = connection.cursor()
+        cursor.execute("""
+                        SELECT vk.keyword, COUNT(vk.keyword), MIN(vv.rating)
+                        FROM video_keywordvideoid as vk, video_video as vv
+                        WHERE vk.video_id=vv.video_id
+                        GROUP BY vk.keyword
+                        ORDER BY COUNT(vk.keyword) DESC
+                       """)
+        rows = cursor.fetchall()
+        for row in rows:
+            KEYWORD_COUNT_LIST.append(row)
+    return KEYWORD_COUNT_LIST
 
 
 def dict_for_video(video):
@@ -113,13 +138,20 @@ def load_search_result_with_keyword(keys, rating):
         condition = Q()
         for key in keys:
             condition.add(('keyword__icontains', key), 'AND')
-        condition.add(('rating__lte', rating), 'AND')
-        records = KeywordVideoId.objects.select_related().filter(condition).distinct('video')
+        condition.add(('video__rating__lte', rating), 'AND')
+        records = KeywordVideoId.objects.select_related().filter(condition)
 
-        results = [dict_for_video(item.video) for item in records]
+        # Sqlite cannot use distinct, so use this as workaround
+        results = []
+        video_set = set()
+        for item in records:
+            if item.video.video_id not in video_set:
+                results.append(dict_for_video(item.video))
+                video_set.add(item.video.video_id)
         return results
-    except Exception as e:
-        log.error("Error searching result with keyword:{0} {1}".format(keys, e))
+    except:
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        traceback.print_exception(exc_type, exc_value, exc_traceback, limit=5, file=sys.stdout)
         return QuerySet()
 
 
@@ -133,15 +165,15 @@ def keyword_suggest(request):
             return HttpResponse('', status=400)
 
         # results ordered by count field in descending order
-        available_keywords = KeywordCount.objects.filter(keyword__icontains=keyword).order_by('-count')
+        print '# Original keyword:', keyword
+        keys = convert_keyword(keyword)
+        print '# Converted:', keys
+        keyword = keys[-1:]
+        print '### Keyword:', keyword
+        keyword = keyword[0]
+        sug_list = [(k, c) for (k, c, r) in get_keyword_count_list() if k.find(keyword) > -1 and r<=request.user.rating]
 
-        if available_keywords:
-            sug_list = []
-            for record in available_keywords:
-                sug_list.append(record.keyword)
-            return JsonResponse({'keywords': sug_list})
-
-        return HttpResponse('', status=404)
+        return JsonResponse({'keywords': sug_list})
     except:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         traceback.print_exception(exc_type, exc_value, exc_traceback, limit=5, file=sys.stdout)
