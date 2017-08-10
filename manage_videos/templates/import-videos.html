@@ -17,18 +17,22 @@
 
 		function customizeRow(row, rowIdx, rowData) {
 			if(rowData[1]) { // is dir
-				row.onclick = function(){
-					path = currentDir + rowData[0]
-					loadDirTable(path)
-				}
 				row.classList.add("info")
 			}
 		}
 
 		// Customize cells
 		function customizeCell(rowIdx, colIdx, cell, cellData) {
-			if( colIdx == 1 ) {
+			switch(colIdx) {
+				case 0:
+				cell.onclick = function(){
+					path = currentDir + cellData
+					loadDirTable(path)
+				}
+				break
+				case 1:
 				cell.innerHTML = cellData? "DIR" : "File"
+				break
 			}
 		}
 
@@ -39,6 +43,9 @@
         }
 
         function loadDirTable(dir){
+        	if(dir.charAt(0) == '/') {
+        		dir = dir.substr(1)
+        	}
             $.post("{% url 'manage:dir' %}", { 'dir':dir, 'csrfmiddlewaretoken': getCookie('csrftoken')},
                 function(result,status){
                 	if(status == "success"){
@@ -46,7 +53,9 @@
 						if( currentDir.length > 0 && currentDir[currentDir.length-1] != '/' ) {
 							currentDir += '/'
 						}
-						$(".panel-title").text(currentDir)
+
+						createDirTitle(dir)
+						//$(".panel-title").text(currentDir)
 
 						var headers = result['headers']
 						var data = result['data']
@@ -54,6 +63,33 @@
                 	}
                 }
             );
+        }
+
+        function createDirTitle(dir) {
+        	components = dir.split("/")
+        	var titleNode = $(".panel-title")
+        	titleNode.empty()
+			components.unshift("/")
+        	for(var i=0; i<components.length; i++) {
+        		span = document.createElement("span")
+        		span.innerHTML = components[i]
+        		span.classList.add("label")
+        		if( (i+1) < components.length ) {
+        			span.classList.add("label-primary")
+
+					arr = components.slice(1, i+1)
+					path = arr.join("/")
+					span.name = path
+					span.onclick = function() {
+						loadDirTable(this.name)
+					}
+        		}else{
+        			span.classList.add("label-default")
+        		}
+
+        		titleNode.append(span)
+        		titleNode.append("  ")
+        	}
         }
 
 	</script>

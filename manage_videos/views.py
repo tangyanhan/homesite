@@ -59,8 +59,6 @@ def load_dir(request):
 
     dir_list = []
     file_list = []
-    if path != root:
-        dir_list.append(['..', True])
     for fn in os.listdir(path):
         if fn.startswith('.'):
             continue
@@ -69,7 +67,7 @@ def load_dir(request):
 
         if os.path.isdir(entry):
             dir_list.append([fn, True])
-        else:
+        elif fn.endswith('.mp4'):
             file_list.append([fn, False])
     entry_list = dir_list + file_list
 
