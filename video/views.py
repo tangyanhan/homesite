@@ -179,6 +179,9 @@ def keyword_suggest(request):
         traceback.print_exception(exc_type, exc_value, exc_traceback, limit=5, file=sys.stdout)
         return HttpResponse('', status=500)
 
+def rating_detail(request):
+    return render(request, 'rating-detail.html')
+
 
 def handler404(request, template_name='404.html'):
     return render_to_response(template_name)

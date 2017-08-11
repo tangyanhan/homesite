@@ -36,6 +36,7 @@ urlpatterns = [
                   url(r'^stream/([a-f0-9]+)$', video_stream.stream, name='stream'),
                   url(r'^search.*$', video_views.videos, name='search'),
                   url(r'^suggest/$', video_views.keyword_suggest, name='keyword_suggest'),
+                  url(r'^rating_detail/$', video_views.rating_detail, name='rating-detail'),
                   url(r'^admin/', admin.site.urls, name='admin'),
                   url(r'^manage/', include('manage_videos.urls', namespace='manage')),
                   url(r'^accounts/login/$', auth_views.login, {'template_name': 'login.html'}),

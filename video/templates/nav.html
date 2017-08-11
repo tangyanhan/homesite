@@ -9,6 +9,13 @@
 	<script type="text/javascript" src="{% static 'js/video-thumb.js' %}"></script>
 	<script type="text/javascript" src="{% static 'js/flip.js' %}"></script>
 	<script>
+		var ratingList = ["G: For general audiences",
+        				  "PG: Parental guidance",
+                          "PG13: Parents Strongly Cautioned",
+        				  "R: Restricted",
+        				  "NC17: NO ONE AND UNDER 17 ADMITTED",
+        				  "Private: Videos for private access"]
+
 		$(document).ready( function(){
 			setupThumbListener()
 			setupFlipListener()
@@ -20,7 +27,9 @@
 		    		$(this).addClass("btn-primary")
 		    	}
 		    });
+		    $("#rating-link").text(ratingList[ {{ request.user.rating }} ])
 		});
+
 	</script>
 	<!-- navbar -->
 	<nav class="navbar nav-default">
@@ -53,20 +62,17 @@
 					<li><a href="{% url 'manage:import' %}">Import</a></li>
 					{% endif %}
 					{% if request.user.is_authenticated %}
-					<li class="dropdown">
-						<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-labelledby="user-menu"
-						   role="button" aria-haspopup="true" aria-expanded="false">{{ request.user.username }} <span
+					<li id="user-dropdown" class="dropdown">
+						<a class="dropdown-toggle" data-toggle="dropdown" role="button">{{ request.user.username }} <span
 								class="caret"></span></a>
-						<ul class="dropdown-menu" role="menu" id="user-menu">
-							<li><a href="#">Info</a></li>
-							<li><a href="#">Settings</a></li>
+						<ul id="user-menu" class="dropdown-menu">
+							<li><a id="rating-link" href="{% url 'rating-detail' %}"></a></li>
 							<li role="separator" class="divider"></li>
-							<li><a href="{% url 'admin:logout' %}">Log out</a></li>
+							<li><a href="{% url 'admin:logout' %}?next={% url 'video-index' %}">Log out</a></li>
 						</ul>
 					</li>
 					{% else %}
 					<li><a href="{% url 'admin:login' %}?next={{ request.path }}">Log in</a></li>
-					<li><a href="{% url 'admin:logout' %}?next=/">Sign up</a></li>
 					{% endif %}
 				</ul>
 			</div><!-- /.navbar-collapse -->

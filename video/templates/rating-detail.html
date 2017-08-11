@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	{% load static %}
+	<meta charset="UTF-8">
+	<title>Rating System</title>
+</head>
+<body>
+
+{% include 'nav.html' %}
+
+<div class="container">
+	<p><strong>The</strong> website provides a Movie Rating System that is similar to the American one, except that it added a "P" rating, which means the video is totally private and you don't wish it be watched by others.
+		<br>
+Rating "P" was added simply to avoid misunderstanding.<br>
+Videos are provided with a rating when importing with collect_video, and it's "P" by default, which is the highest level.<br>
+
+		<strong>Anonymous</strong> users are granted with the lowest "G" level. They can visit the site without logging in - so be careful importing videos with "G"
+	</p>
+	<table class="table table-hover">
+		<thead>
+			<tr><th>Level</th><th>Rating</th><th>Detail</th></tr>
+		</thead>
+		<tbody>
+			<tr class="success"><td>0</td><td>G: For general audiences</td><td>Contains no deaths/violence/sex/gamble/alcohol/etc</td></tr>
+			<tr class="info"><td>1</td><td>PG: Parental guidance</td><td>Minor plot with deaths/violence</td></tr>
+			<tr class="warning"><td>2</td><td>PG13: Parents Strongly Cautioned</td><td>Minor plot with deaths/violence/sex/gamble/alcohol/etc</td></tr>
+		<tr class="danger"><td>3</td><td>R: Restricted</td><td>Huge amount of plots that may be uncomfortable</td></tr>
+		<tr class="danger"><td>4</td><td>NC17: NO ONE AND UNDER 17 ADMITTED</td><td>Adult video, or video with severe deaths/violence</td></tr>
+		<tr class="danger"><td>5</td><td>PPrivate: Videos for private access</td><td>Private videos. You may only watch them with superuser account</td></tr>
+		</tbody>
+	</table>
+</div>
+
+</body>
+</html>
