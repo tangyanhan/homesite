@@ -93,6 +93,12 @@ def start_tasks(task_list):
         for _ in range(MAX_THREAD_NUM):
             THREAD_STOP_FLAGS.append(True)
 
+    if not os.path.isdir(COVER_DIR):
+        os.mkdir(COVER_DIR)
+    if not os.path.isdir(THUMB_DIR):
+        os.mkdir(THUMB_DIR)
+    if not os.path.isdir(FLIP_DIR):
+        os.mkdir(FLIP_DIR)
     for _ in range(MAX_THREAD_NUM):
         if THREAD_STOP_FLAGS[_]:
             t = Thread(target=import_worker, kwargs={'thread_index': _})
@@ -244,16 +250,10 @@ class KeywordDictDataObj(object):
 
 
 def get_thumb_path(fn):
-    if not os.path.isdir(THUMB_DIR):
-        os.mkdir(THUMB_DIR)
-
     return './static/thumb/' + str(fn) + '.png'
 
 
 def get_cover_path(fn):
-    if not os.path.isdir(COVER_DIR):
-        os.mkdir(COVER_DIR)
-
     return './static/cover/' + str(fn) + '.png'
 
 
@@ -268,7 +268,6 @@ def gen_thumb(video_path, thumb_path):
     global THUMB_SIZE
     cmd = ['ffmpeg', '-itsoffset', '-5', '-i', video_path, '-vframes', '1', '-f', 'apng', '-s', THUMB_SIZE, thumb_path]
     p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    p.stdin.write('y\n')
     output = p.communicate()[1]
 
     duration = search_duration_from_text(output)
@@ -292,8 +291,6 @@ def gen_flips(video_path, video_id, duration, flip_path, flip_num):
     """
     if not G_GEN_IMAGE:
         return True
-    if not os.path.isdir(flip_path):
-        os.mkdir(flip_path)
 
     duration = float(duration)
     flip_num = float(flip_num)
@@ -304,10 +301,14 @@ def gen_flips(video_path, video_id, duration, flip_path, flip_num):
         return False
     fps = 'fps=1/' + str(interval)
     global THUMB_SIZE
-    flip_path = os.path.join(flip_path, str(video_id)) + '-%d.png'
-    cmd = ['ffmpeg', '-i', video_path, '-vf', fps, '-s', THUMB_SIZE, flip_path]
+    flip_path = os.path.join(flip_path, str(video_id))
+    for _ in range(FLIP_NUM+3):
+        flip_file = "{0}-{1}.png".format(flip_path, _)
+        if os.path.isfile(flip_file):
+            os.remove(flip_file)
+    flip_path_template = flip_path + '-%d.png'
+    cmd = ['ffmpeg', '-i', video_path, '-vf', fps, '-s', THUMB_SIZE, flip_path_template]
     p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    p.stdin.write('y\n')
     p.communicate()
 
     return p.returncode == 0
@@ -321,7 +322,6 @@ def gen_cover(video_path, cover_path):
 
     cmd = ['ffmpeg', '-itsoffset', '-1', '-i', video_path, '-vframes', '1', '-f', 'apng', cover_path]
     p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    p.stdin.write('y\n')
     p.communicate()
 
     return p.returncode == 0
@@ -337,7 +337,6 @@ def convert_video_to_mp4(video_path, dest_path):
 
     cmd = ['ffmpeg', '-i', video_path, '-vcodec', 'h264', '-acodec', 'aac', dest_path]
     p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    p.stdin.write('y\n')
     p.communicate()
 
     return p.returncode == 0
