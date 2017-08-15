@@ -39,7 +39,7 @@ urlpatterns = [
                   url(r'^rating_detail/$', video_views.rating_detail, name='rating-detail'),
                   url(r'^admin/', admin.site.urls, name='admin'),
                   url(r'^manage/', include('manage_videos.urls', namespace='manage')),
-                  url(r'^accounts/login/$', auth_views.login, {'template_name': 'login.html'}),
+                  url(r'^login/$', auth_views.login, {'template_name': 'login.html'}),
                   url(r'^cert/', https_views.certificate_download, name='cert'),
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

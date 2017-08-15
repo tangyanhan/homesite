@@ -72,7 +72,7 @@
 						</ul>
 					</li>
 					{% else %}
-					<li><a href="{% url 'admin:login' %}?next={{ request.path }}">Log in</a></li>
+					<li><a href="/login/?next={{ request.path }}">Log in</a></li>
 					{% endif %}
 				</ul>
 			</div><!-- /.navbar-collapse -->

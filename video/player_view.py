@@ -15,9 +15,14 @@ from views import dict_for_video
 MAX_RECOMMEND_NUM = 10
 
 
-@login_required
-def play(request, digest):
-    return render(request, 'video-player.html', {'video': digest, 'thumb': 'thumb/' + digest + '.png'})
+def play(request, video_id):
+    rating = Video.G
+    if isinstance(request.user, CustomUser):
+        rating = request.user.rating
+    video = Video.objects.filter(video_id=video_id)
+    if rating < video[0].rating:
+        return HttpResponse('You are not permitted to access this content', status=403)
+    return render(request, 'video-player.html', {'video': video_id, 'thumb': 'thumb/' + video_id + '.png'})
 
 
 def rate(request):

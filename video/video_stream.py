@@ -3,9 +3,10 @@ import os
 import re
 
 from wsgiref.util import FileWrapper
-from django.http import StreamingHttpResponse
+from django.http import StreamingHttpResponse, HttpResponse
 from django.shortcuts import render
 
+from custom_user.models import CustomUser
 from models import Video
 
 range_re = re.compile(r'bytes\s*=\s*(\d+)\s*-\s*(\d*)', re.I)
@@ -42,11 +43,18 @@ class RangeFileWrapper(object):
             return data
 
 
-def stream(request, digest):
-    video = Video.objects.get(video_id=digest)
+def stream(request, video_id):
+    video = Video.objects.get(video_id=video_id)
 
     if video is None:
         return render(request, '404.html')
+
+    rating = Video.G
+    if isinstance(request.user, CustomUser):
+        rating = request.user.rating
+    video = Video.objects.filter(video_id=video_id)
+    if rating < video[0].rating:
+        return HttpResponse('You are not permitted to access this content', status=403)
 
     path = video.path
 

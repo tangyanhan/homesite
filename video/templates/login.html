@@ -1,48 +1,64 @@
 <html lang="en-us">
 <head>
-	<title>Log in | Django site admin</title>
-	<link rel="stylesheet" type="text/css" href="/static/admin/css/base.css">
-	<link rel="stylesheet" type="text/css" href="/static/admin/css/login.css">
+	{% load static %}
+	<title>Log in</title>
+	<link href="{% static 'bootstrap-3.3.7/css/bootstrap.css' %}" rel="stylesheet">
+	<link href="{% static 'css/common.css' %}" rel="stylesheet">
+	<script type="text/javascript" src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+    <link href="{% static 'bootstrap-3.3.7/css/bootstrap.css' %}" rel="stylesheet">
+    <script type="text/javascript" src="{% static 'bootstrap-3.3.7/js/bootstrap.js' %}"></script>
 
 	<meta name="robots" content="NONE,NOARCHIVE">
+	<style>
+        @media (min-width: 768px) {
+            .account-forms{
+                width:320px;
+            }
+        }
+        @media (max-width: 767px) {
+            .account-forms{
+                width:80%;
+                margin-top:100px;
+            }
+        }
+        .account-forms{
+            margin-left:auto;
+            margin-right:auto;
+            margin-top:200px;
+        }
+        #title{
+            margin-bottom:20px;
+        }
+    </style>
 </head>
 
 <body class=" login" data-admin-utc-offset="0">
 
 <!-- Container -->
 <div id="container">
-
-
-	<!-- Header -->
-	<div id="header">
-		<div id="branding">
-
-			<h1 id="site-name"><a href="/admin/">User Login</a></h1>
-
-		</div>
-
-
-	</div>
-	<!-- END Header -->
-
-
 	<!-- Content -->
-	<div id="content" class="colM">
+	<div class="account-forms">
 		<div id="content-main">
 			<form action="/admin/login/" method="post" id="login-form">{% csrf_token %}
-				<div class="form-row">
-					<label class="required" for="id_username">Username:</label> <input autofocus="" id="id_username"
+				      <h1 id="title" class="text-center">User Login</h1>
+					<div class="input-group input-group-lg">
+					  <span class="input-group-addon">
+						<span class="glyphicon glyphicon-envelope"></span>
+					  </span>
+					  <input name="username" class="form-control" type="text" placeholder="Username" id="id_username"
 																					   maxlength="254" name="username"
 																					   type="text" required="">
-				</div>
-				<div class="form-row">
-					<label class="required" for="id_password">Password:</label> <input id="id_password" name="password"
-																					   type="password" required="">
-					<input type="hidden" name="next" value="{{ next }}">
-				</div>
-				<div class="submit-row">
-					<label>&nbsp;</label><input type="submit" value="Log in">
-				</div>
+					</div>
+					<div style="height:10px;"></div>
+					<div class="input-group input-group-lg">
+					  <span class="input-group-addon">
+						<span class="glyphicon glyphicon-lock"></span>
+					  </span>
+					  <input id="id_password" name="password" for="id_password" required="" class="form-control" type="password" placeholder="Password">
+						<input type="hidden" name="next" value="{{ next }}">
+					</div>
+					<div style="height:10px;"></div>
+					<input type="submit" class="btn btn-success btn-lg" style="width:100%;" value="Login">
 			</form>
 		</div>
 		<br class="clear">
